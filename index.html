@@ -19,59 +19,57 @@
       padding: 0;
       overflow: hidden;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #202737 0, #050509 55%, #000 100%);
+      background: radial-gradient(circle at top, #e0f2ff 0, #c0ccf2 45%, #8a9ac4 100%);
     }
 
-    /* Judul peta di bagian atas */
+    /* Judul peta */
     #map-title {
       position: absolute;
       top: 10px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 9;
-      padding: 6px 18px;
-      background: linear-gradient(120deg, rgba(255, 180, 71, 0.95), rgba(255, 234, 167, 0.9));
-      color: #1b1b1b;
+      padding: 6px 20px;
+      background: linear-gradient(120deg, rgba(40, 120, 230, 0.98), rgba(132, 210, 255, 0.96));
+      color: #ffffff;
       border-radius: 999px;
       font-size: 15px;
       font-weight: 650;
       letter-spacing: 0.06em;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
       text-transform: uppercase;
       white-space: nowrap;
     }
 
-    /* Panel kontrol kiri atas (glassmorphism) */
+    /* Panel kontrol (glass, biru) */
     #toolbar {
       position: absolute;
-      top: 56px;
+      top: 58px;
       left: 16px;
       z-index: 10;
       padding: 12px 14px;
-      min-width: 270px;
+      min-width: 280px;
 
-      background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.13), rgba(10, 10, 16, 0.92));
+      background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.9), rgba(230, 243, 255, 0.93));
       border-radius: 18px;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
       box-shadow:
-        0 18px 45px rgba(0, 0, 0, 0.6),
-        0 0 0 1px rgba(255, 255, 255, 0.05);
-      color: #f8f8f8;
+        0 18px 45px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.9);
+      color: #1c2435;
     }
 
     #toolbar h1 {
       font-size: 13px;
       margin: 0 0 6px 0;
-      font-weight: 600;
-      letter-spacing: 0.08em;
+      font-weight: 650;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: #ffe2ae;
+      color: #2956a3;
     }
 
     #toolbar section {
       margin-top: 6px;
-      border-top: 1px solid rgba(255, 255, 255, 0.14);
+      border-top: 1px solid rgba(120, 140, 190, 0.35);
       padding-top: 6px;
     }
 
@@ -88,22 +86,22 @@
       padding: 5px 9px;
       font-size: 12px;
       cursor: pointer;
-      background: rgba(35, 35, 45, 0.95);
-      color: #f1f1f1;
+      background: rgba(230, 238, 255, 0.9);
+      color: #1f2937;
       transition: background 0.18s, transform 0.1s, box-shadow 0.1s;
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04);
+      box-shadow: 0 0 0 1px rgba(148, 163, 209, 0.6);
     }
 
     button.mode-btn.active {
-      background: linear-gradient(120deg, #ffb347, #ffd280);
-      color: #141414;
+      background: linear-gradient(120deg, #2563eb, #60a5fa);
+      color: #f9fafb;
       box-shadow:
-        0 0 0 1px rgba(255, 255, 255, 0.4),
-        0 8px 18px rgba(0, 0, 0, 0.55);
+        0 0 0 1px rgba(191, 219, 254, 0.9),
+        0 8px 18px rgba(15, 23, 42, 0.45);
     }
 
     button.mode-btn:hover {
-      background: rgba(60, 60, 78, 0.98);
+      background: rgba(209, 226, 255, 0.95);
       transform: translateY(-1px);
     }
 
@@ -117,7 +115,7 @@
 
     input[type="range"] {
       width: 100%;
-      accent-color: #ffb347;
+      accent-color: #2563eb;
     }
 
     #time-display {
@@ -133,7 +131,7 @@
       opacity: 0.8;
     }
 
-    /* Badge kecil di pojok bawah kiri untuk instruksi */
+    /* Hint bawah kiri */
     #hint-badge {
       position: absolute;
       left: 16px;
@@ -141,10 +139,10 @@
       z-index: 8;
       padding: 6px 10px;
       font-size: 11px;
-      color: #eaeaea;
-      background: rgba(10, 10, 16, 0.85);
+      color: #0f172a;
+      background: rgba(239, 246, 255, 0.96);
       border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(148, 163, 209, 0.7);
       max-width: 260px;
       line-height: 1.35;
     }
@@ -206,11 +204,10 @@
     <div id="status">Memuat data…</div>
   </div>
 
-  <!-- Hint di bawah kiri -->
+  <!-- Hint -->
   <div id="hint-badge">
-    Tips: gunakan tombol <b>3D / 2D</b> untuk mengubah tampilan, slider
-    untuk mengatur siang–malam, dan mode <b>Panjang/Luas</b> untuk mengukur di sekitar
-    bangunan Terban.
+    Gunakan <b>3D / 2D</b> untuk mengubah tampilan, slider untuk siang–malam, dan mode
+    <b>Panjang</b> atau <b>Luas</b> untuk analisis di sekitar bangunan Kelurahan Terban.
   </div>
 
   <!-- Container Cesium -->
@@ -218,7 +215,7 @@
 
   <script>
     // ===== 1. Token & Asset ID =====
-    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwNTY2Y2Y1Ni02YWUyLTQ1OWQtODcyYi1lZGM5OTJhOWI1OWQiLCJpZCI6MjEzNjk3LCJpYXQiOjE3NjU4NjA2NzF9.37HTp-nTHxNr4umeQruV45iHJnaxmJsS94B_yUIdm28'; // ganti
+    Cesium.Ion.defaultAccessToken = 'yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwNTY2Y2Y1Ni02YWUyLTQ1OWQtODcyYi1lZGM5OTJhOWI1OWQiLCJpZCI6MjEzNjk3LCJpYXQiOjE3NjU4NjA2NzF9.37HTp-nTHxNr4umeQruV45iHJnaxmJsS94B_yUIdm28'; // GANTI
 
     const ASSET_ID_3D = 4224210;   // ganti dengan asset 3D Anda
     const ASSET_ID_2D = 4224206;   // ganti dengan asset 2D Anda
@@ -236,6 +233,15 @@
       navigationHelpButton: false,
       fullscreenButton: true
     });
+
+    // Ganti basemap default ke peta jalan (bukan citra satelit)
+    (async function () {
+      const roadImagery = await Cesium.createWorldImageryAsync({
+        style: Cesium.IonWorldImageryStyle.ROAD
+      });
+      viewer.imageryLayers.removeAll();
+      viewer.imageryLayers.addImageryProvider(roadImagery);
+    })();
 
     viewer.scene.globe.enableLighting = true;
     viewer.shadows = true;
@@ -269,7 +275,7 @@
       }
     }
 
-    // ===== 3. Muat data dan langsung zoom ke data =====
+    // ===== 3. Muat data & zoom default ke Terban =====
     let tileset3D = null;
     let dataSource2D = null;
 
@@ -283,39 +289,38 @@
         dataSource2D = await Cesium.GeoJsonDataSource.fromIonAssetId(ASSET_ID_2D);
         viewer.dataSources.add(dataSource2D);
 
-        // styling 2D
         const entities = dataSource2D.entities.values;
         for (let i = 0; i < entities.length; i++) {
           const e = entities[i];
           if (e.polygon) {
-            e.polygon.material = Cesium.Color.ORANGE.withAlpha(0.6);
+            e.polygon.material = Cesium.Color.fromCssColorString('#fb923c').withAlpha(0.65);
             e.polygon.outline = true;
-            e.polygon.outlineColor = Cesium.Color.DARKRED;
+            e.polygon.outlineColor = Cesium.Color.fromCssColorString('#b45309');
           }
           if (e.polyline) {
-            e.polyline.width = 2.0;
-            e.polyline.material = Cesium.Color.CYAN;
+            e.polyline.width = 2.2;
+            e.polyline.material = Cesium.Color.fromCssColorString('#0ea5e9');
           }
           if (e.point) {
             e.point.pixelSize = 8;
-            e.point.color = Cesium.Color.YELLOW;
-            e.point.outlineColor = Cesium.Color.BLACK;
+            e.point.color = Cesium.Color.fromCssColorString('#facc15');
+            e.point.outlineColor = Cesium.Color.fromCssColorString('#1f2937');
             e.point.outlineWidth = 1;
           }
         }
 
-        // === Zoom awal langsung ke area data (default view) ===
+        // Zoom awal langsung ke bounding sphere 3D Tiles
         const bs = tileset3D.boundingSphere;
         viewer.camera.flyToBoundingSphere(bs, {
-          duration: 0.0, // langsung, tanpa animasi panjang
+          duration: 0.0,
           offset: new Cesium.HeadingPitchRange(
-            Cesium.Math.toRadians(-35.0),   // heading
-            Cesium.Math.toRadians(-35.0),   // pitch miring ke bawah
-            bs.radius * 2.5                 // jarak kamera
+            Cesium.Math.toRadians(-35.0),
+            Cesium.Math.toRadians(-35.0),
+            bs.radius * 2.5
           )
         });
 
-        // Override tombol Home supaya kembali ke area Terban
+        // Set tombol Home kembali ke area Terban
         viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (e) {
           e.cancel = true;
           viewer.camera.flyToBoundingSphere(bs, {
@@ -337,7 +342,7 @@
 
     loadData();
 
-    // Tombol zoom manual
+    // Zoom ke data via tombol
     btnZoomToData.addEventListener('click', function () {
       if (tileset3D) {
         const bs = tileset3D.boundingSphere;
@@ -356,12 +361,12 @@
 
     // ===== 4. 2D / 3D =====
     btn3d.addEventListener('click', function () {
-      viewer.scene.morphTo3D(1.2);
+      viewer.scene.morphTo3D(1.1);
       setModeButton('3d');
     });
 
     btn2d.addEventListener('click', function () {
-      viewer.scene.morphTo2D(1.2);
+      viewer.scene.morphTo2D(1.1);
       setModeButton('2d');
     });
 
@@ -472,8 +477,8 @@
         position: cartesian,
         point: {
           pixelSize: 8,
-          color: Cesium.Color.LIME,
-          outlineColor: Cesium.Color.BLACK,
+          color: Cesium.Color.fromCssColorString('#22c55e'),
+          outlineColor: Cesium.Color.fromCssColorString('#111827'),
           outlineWidth: 1
         }
       });
@@ -498,7 +503,7 @@
             polyline: {
               positions: measurePositions,
               width: 3,
-              material: Cesium.Color.LIME
+              material: Cesium.Color.fromCssColorString('#22c55e')
             }
           });
         }
@@ -506,116 +511,4 @@
         const ellipsoid = Cesium.Ellipsoid.WGS84;
         let total = 0.0;
         for (let i = 1; i < measurePositions.length; i++) {
-          const c1 = ellipsoid.cartesianToCartographic(measurePositions[i - 1]);
-          const c2 = ellipsoid.cartesianToCartographic(measurePositions[i]);
-          const geodesic = new Cesium.EllipsoidGeodesic(c1, c2);
-          total += geodesic.surfaceDistance;
-        }
-
-        const lastPos = measurePositions[measurePositions.length - 1];
-
-        const km = total / 1000.0;
-        const text = km >= 1
-          ? `Panjang: ${km.toFixed(3)} km`
-          : `Panjang: ${total.toFixed(1)} m`;
-
-        if (!measureLabelEntity) {
-          measureLabelEntity = viewer.entities.add({
-            position: lastPos,
-            label: {
-              text: text,
-              font: '14px sans-serif',
-              fillColor: Cesium.Color.WHITE,
-              outlineColor: Cesium.Color.BLACK,
-              outlineWidth: 2,
-              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-              verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-              pixelOffset: new Cesium.Cartesian2(0, -10)
-            }
-          });
-        } else {
-          measureLabelEntity.position = lastPos;
-          measureLabelEntity.label.text = text;
-        }
-
-        measureInfoEl.textContent = text;
-      }
-
-      if (measureMode === 'area' && measurePositions.length >= 3) {
-        if (!measureShapeEntity) {
-          measureShapeEntity = viewer.entities.add({
-            polygon: {
-              hierarchy: new Cesium.CallbackProperty(function () {
-                return new Cesium.PolygonHierarchy(measurePositions);
-              }, false),
-              material: Cesium.Color.LIME.withAlpha(0.3),
-              outline: true,
-              outlineColor: Cesium.Color.LIME
-            }
-          });
-        }
-
-        const R = 6378137.0;
-        const cartos = measurePositions.map(p => Cesium.Cartographic.fromCartesian(p));
-        const lat0 = cartos[0].latitude;
-        const cosLat0 = Math.cos(lat0);
-
-        const xy = cartos.map(c => {
-          const x = R * c.longitude * cosLat0;
-          const y = R * c.latitude * R / R;
-          return { x, y };
-        });
-
-        let area = 0.0;
-        for (let i = 0; i < xy.length; i++) {
-          const j = (i + 1) % xy.length;
-          area += xy[i].x * xy[j].y - xy[j].x * xy[i].y;
-        }
-        area = Math.abs(area) * 0.5;
-
-        const ha = area / 10000.0;
-        const km2 = area / 1e6;
-        let text;
-        if (km2 >= 1) {
-          text = `Luas: ${km2.toFixed(3)} km²`;
-        } else if (ha >= 1) {
-          text = `Luas: ${ha.toFixed(2)} ha`;
-        } else {
-          text = `Luas: ${area.toFixed(1)} m²`;
-        }
-
-        let sumX = 0, sumY = 0, sumZ = 0;
-        for (const p of measurePositions) {
-          sumX += p.x; sumY += p.y; sumZ += p.z;
-        }
-        const center = new Cesium.Cartesian3(
-          sumX / measurePositions.length,
-          sumY / measurePositions.length,
-          sumZ / measurePositions.length
-        );
-
-        if (!measureLabelEntity) {
-          measureLabelEntity = viewer.entities.add({
-            position: center,
-            label: {
-              text: text,
-              font: '14px sans-serif',
-              fillColor: Cesium.Color.WHITE,
-              outlineColor: Cesium.Color.BLACK,
-              outlineWidth: 2,
-              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-              verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-              pixelOffset: new Cesium.Cartesian2(0, -10)
-            }
-          });
-        } else {
-          measureLabelEntity.position = center;
-          measureLabelEntity.label.text = text;
-        }
-
-        measureInfoEl.textContent = text;
-      }
-    }
-  </script>
-</body>
-</html>
+          const c1 = ellipsoid.cart
