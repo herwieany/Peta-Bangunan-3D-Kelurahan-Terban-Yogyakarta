@@ -275,67 +275,81 @@
     let tileset3D = null;
     let dataSource2D = null;
 
-    async function loadData() {
-      try {
-        statusEl.textContent = 'Memuat 3D Tiles…';
-        tileset3D = await Cesium.Cesium3DTileset.fromIonAssetId(ASSET_ID_3D);
-        viewer.scene.primitives.add(tileset3D);
+    let tileset3D = null;
+let dataSource2D = null;
 
-        statusEl.textContent = 'Memuat data 2D…';
-        dataSource2D = await Cesium.GeoJsonDataSource.fromIonAssetId(ASSET_ID_2D);
-        viewer.dataSources.add(dataSource2D);
+async function loadData() {
+  // 1) MUAT 3D TILES DULU
+  try {
+    statusEl.textContent = 'Memuat 3D Tiles…';
+    tileset3D = await Cesium.Cesium3DTileset.fromIonAssetId(ASSET_ID_3D);
+    viewer.scene.primitives.add(tileset3D);
 
-        // styling 2D
-        const entities = dataSource2D.entities.values;
-        for (let i = 0; i < entities.length; i++) {
-          const e = entities[i];
-          if (e.polygon) {
-            e.polygon.material = Cesium.Color.fromCssColorString('#60a5fa').withAlpha(0.55);
-            e.polygon.outline = true;
-            e.polygon.outlineColor = Cesium.Color.fromCssColorString('#1d4ed8');
-          }
-          if (e.polyline) {
-            e.polyline.width = 2.0;
-            e.polyline.material = Cesium.Color.fromCssColorString('#2563eb');
-          }
-          if (e.point) {
-            e.point.pixelSize = 7;
-            e.point.color = Cesium.Color.fromCssColorString('#f97316');
-            e.point.outlineColor = Cesium.Color.WHITE;
-            e.point.outlineWidth = 1;
-          }
-        }
+    // === LANGSUNG ZOOM KE AREA DATA SAAT PERTAMA KALI BUKA ===
+    const bs = tileset3D.boundingSphere;
 
-        // Zoom langsung ke area 3D Terban
-        const bs = tileset3D.boundingSphere;
-        viewer.camera.flyToBoundingSphere(bs, {
-          duration: 0.0,
-          offset: new Cesium.HeadingPitchRange(
-            Cesium.Math.toRadians(-35.0),
-            Cesium.Math.toRadians(-40.0),
-            bs.radius * 2.5
-          )
-        });
+    // view awal (tanpa animasi panjang)
+    viewer.camera.flyToBoundingSphere(bs, {
+      duration: 0.0,
+      offset: new Cesium.HeadingPitchRange(
+        Cesium.Math.toRadians(-35.0),  // heading
+        Cesium.Math.toRadians(-40.0),  // pitch miring
+        bs.radius * 2.5                // jarak kamera
+      )
+    });
 
-        // Tombol Home kembali ke Terban
-        viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (e) {
-          e.cancel = true;
-          viewer.camera.flyToBoundingSphere(bs, {
-            duration: 1.2,
-            offset: new Cesium.HeadingPitchRange(
-              Cesium.Math.toRadians(-35.0),
-              Cesium.Math.toRadians(-40.0),
-              bs.radius * 2.5
-            )
-          });
-        });
+    // tombol Home juga kembali ke area ini
+    viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (e) {
+      e.cancel = true;
+      viewer.camera.flyToBoundingSphere(bs, {
+        duration: 1.2,
+        offset: new Cesium.HeadingPitchRange(
+          Cesium.Math.toRadians(-35.0),
+          Cesium.Math.toRadians(-40.0),
+          bs.radius * 2.5
+        )
+      });
+    });
 
-        statusEl.textContent = 'Data siap. Gunakan panel untuk ganti mode, waktu, dan pengukuran.';
-      } catch (err) {
-        console.error(err);
-        statusEl.textContent = 'Gagal memuat data. Cek Asset ID dan token.';
+    statusEl.textContent = '3D Tiles ter-load. Memuat data 2D…';
+  } catch (err) {
+    console.error('Gagal memuat 3D Tiles:', err);
+    statusEl.textContent = 'Gagal memuat 3D Tiles. Cek Asset ID 3D dan token.';
+    return; // tanpa 3D, tidak usah lanjut
+  }
+
+  // 2) MUAT DATA 2D (JIKA ADA) – TAPI JANGAN GANGGU 3D
+  try {
+    dataSource2D = await Cesium.GeoJsonDataSource.fromIonAssetId(ASSET_ID_2D);
+    viewer.dataSources.add(dataSource2D);
+
+    const entities = dataSource2D.entities.values;
+    for (let i = 0; i < entities.length; i++) {
+      const e = entities[i];
+      if (e.polygon) {
+        e.polygon.material = Cesium.Color.fromCssColorString('#60a5fa').withAlpha(0.55);
+        e.polygon.outline = true;
+        e.polygon.outlineColor = Cesium.Color.fromCssColorString('#1d4ed8');
+      }
+      if (e.polyline) {
+        e.polyline.width = 2.0;
+        e.polyline.material = Cesium.Color.fromCssColorString('#2563eb');
+      }
+      if (e.point) {
+        e.point.pixelSize = 7;
+        e.point.color = Cesium.Color.fromCssColorString('#f97316');
+        e.point.outlineColor = Cesium.Color.WHITE;
+        e.point.outlineWidth = 1;
       }
     }
+
+    statusEl.textContent = 'Data 3D & 2D siap. Silakan eksplor peta.';
+  } catch (err) {
+    console.warn('3D berhasil, tapi gagal memuat data 2D:', err);
+    statusEl.textContent = '3D siap. Data 2D tidak berhasil dimuat (cek Asset ID 2D).';
+  }
+}
+
 
     loadData();
 
@@ -621,3 +635,4 @@
   </script>
 </body>
 </html>
+
