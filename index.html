@@ -19,52 +19,59 @@
       padding: 0;
       overflow: hidden;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #202737 0, #050509 55%, #000 100%);
     }
 
-    /* Judul peta di atas, tengah */
+    /* Judul peta di bagian atas */
     #map-title {
       position: absolute;
       top: 10px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 9;
-      padding: 6px 14px;
-      background: rgba(20, 20, 20, 0.85);
-      color: #ffffff;
+      padding: 6px 18px;
+      background: linear-gradient(120deg, rgba(255, 180, 71, 0.95), rgba(255, 234, 167, 0.9));
+      color: #1b1b1b;
       border-radius: 999px;
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-      text-align: center;
+      font-size: 15px;
+      font-weight: 650;
+      letter-spacing: 0.06em;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+      text-transform: uppercase;
       white-space: nowrap;
     }
 
+    /* Panel kontrol kiri atas (glassmorphism) */
     #toolbar {
       position: absolute;
-      top: 50px;          /* diturunkan sedikit karena ada judul */
-      left: 12px;
+      top: 56px;
+      left: 16px;
       z-index: 10;
-      background: rgba(20, 20, 20, 0.85);
-      color: #fff;
-      padding: 10px 12px;
-      border-radius: 10px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-      min-width: 260px;
+      padding: 12px 14px;
+      min-width: 270px;
+
+      background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.13), rgba(10, 10, 16, 0.92));
+      border-radius: 18px;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow:
+        0 18px 45px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+      color: #f8f8f8;
     }
 
     #toolbar h1 {
-      font-size: 14px;
+      font-size: 13px;
       margin: 0 0 6px 0;
       font-weight: 600;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: #ffd27f;
+      color: #ffe2ae;
     }
 
     #toolbar section {
       margin-top: 6px;
-      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
       padding-top: 6px;
     }
 
@@ -78,22 +85,25 @@
       flex: 1;
       border: none;
       border-radius: 999px;
-      padding: 4px 8px;
+      padding: 5px 9px;
       font-size: 12px;
       cursor: pointer;
-      background: #2f2f2f;
-      color: #fff;
-      transition: background 0.2s, transform 0.1s, box-shadow 0.1s;
+      background: rgba(35, 35, 45, 0.95);
+      color: #f1f1f1;
+      transition: background 0.18s, transform 0.1s, box-shadow 0.1s;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04);
     }
 
     button.mode-btn.active {
-      background: #ffb347;
-      color: #1b1b1b;
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+      background: linear-gradient(120deg, #ffb347, #ffd280);
+      color: #141414;
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.4),
+        0 8px 18px rgba(0, 0, 0, 0.55);
     }
 
     button.mode-btn:hover {
-      background: #444;
+      background: rgba(60, 60, 78, 0.98);
       transform: translateY(-1px);
     }
 
@@ -102,11 +112,12 @@
       justify-content: space-between;
       font-size: 11px;
       margin-bottom: 2px;
-      opacity: 0.8;
+      opacity: 0.9;
     }
 
     input[type="range"] {
       width: 100%;
+      accent-color: #ffb347;
     }
 
     #time-display {
@@ -119,7 +130,23 @@
     #status, #measure-info {
       font-size: 11px;
       margin-top: 4px;
-      opacity: 0.7;
+      opacity: 0.8;
+    }
+
+    /* Badge kecil di pojok bawah kiri untuk instruksi */
+    #hint-badge {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      z-index: 8;
+      padding: 6px 10px;
+      font-size: 11px;
+      color: #eaeaea;
+      background: rgba(10, 10, 16, 0.85);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      max-width: 260px;
+      line-height: 1.35;
     }
   </style>
 </head>
@@ -179,14 +206,22 @@
     <div id="status">Memuat data…</div>
   </div>
 
+  <!-- Hint di bawah kiri -->
+  <div id="hint-badge">
+    Tips: gunakan tombol <b>3D / 2D</b> untuk mengubah tampilan, slider
+    untuk mengatur siang–malam, dan mode <b>Panjang/Luas</b> untuk mengukur di sekitar
+    bangunan Terban.
+  </div>
+
+  <!-- Container Cesium -->
   <div id="cesiumContainer"></div>
 
   <script>
-    // ===== 1. Token & Asset ID dari Cesium ion =====
-    Cesium.Ion.defaultAccessToken = 'YOUR_ION_ACCESS_TOKEN'; // GANTI di sini
+    // ===== 1. Token & Asset ID =====
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwNTY2Y2Y1Ni02YWUyLTQ1OWQtODcyYi1lZGM5OTJhOWI1OWQiLCJpZCI6MjEzNjk3LCJpYXQiOjE3NjU4NjA2NzF9.37HTp-nTHxNr4umeQruV45iHJnaxmJsS94B_yUIdm28'; // ganti
 
-    const ASSET_ID_3D = 4224210;   // ganti dengan asset ID 3D Anda
-    const ASSET_ID_2D = 4224206;   // ganti dengan asset ID 2D Anda
+    const ASSET_ID_3D = 4224210;   // ganti dengan asset 3D Anda
+    const ASSET_ID_2D = 4224206;   // ganti dengan asset 2D Anda
 
     // ===== 2. Inisialisasi viewer =====
     const viewer = new Cesium.Viewer('cesiumContainer', {
@@ -234,7 +269,7 @@
       }
     }
 
-    // ===== 3. Muat data =====
+    // ===== 3. Muat data dan langsung zoom ke data =====
     let tileset3D = null;
     let dataSource2D = null;
 
@@ -248,6 +283,7 @@
         dataSource2D = await Cesium.GeoJsonDataSource.fromIonAssetId(ASSET_ID_2D);
         viewer.dataSources.add(dataSource2D);
 
+        // styling 2D
         const entities = dataSource2D.entities.values;
         for (let i = 0; i < entities.length; i++) {
           const e = entities[i];
@@ -268,7 +304,30 @@
           }
         }
 
-        await viewer.flyTo(tileset3D);
+        // === Zoom awal langsung ke area data (default view) ===
+        const bs = tileset3D.boundingSphere;
+        viewer.camera.flyToBoundingSphere(bs, {
+          duration: 0.0, // langsung, tanpa animasi panjang
+          offset: new Cesium.HeadingPitchRange(
+            Cesium.Math.toRadians(-35.0),   // heading
+            Cesium.Math.toRadians(-35.0),   // pitch miring ke bawah
+            bs.radius * 2.5                 // jarak kamera
+          )
+        });
+
+        // Override tombol Home supaya kembali ke area Terban
+        viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (e) {
+          e.cancel = true;
+          viewer.camera.flyToBoundingSphere(bs, {
+            duration: 1.2,
+            offset: new Cesium.HeadingPitchRange(
+              Cesium.Math.toRadians(-35.0),
+              Cesium.Math.toRadians(-35.0),
+              bs.radius * 2.5
+            )
+          });
+        });
+
         statusEl.textContent = 'Data siap. Gunakan panel untuk ganti mode, waktu, dan pengukuran.';
       } catch (err) {
         console.error(err);
@@ -278,9 +337,18 @@
 
     loadData();
 
+    // Tombol zoom manual
     btnZoomToData.addEventListener('click', function () {
       if (tileset3D) {
-        viewer.flyTo(tileset3D);
+        const bs = tileset3D.boundingSphere;
+        viewer.camera.flyToBoundingSphere(bs, {
+          duration: 1.2,
+          offset: new Cesium.HeadingPitchRange(
+            Cesium.Math.toRadians(-35.0),
+            Cesium.Math.toRadians(-35.0),
+            bs.radius * 2.5
+          )
+        });
       } else if (dataSource2D) {
         viewer.flyTo(dataSource2D);
       }
@@ -288,16 +356,16 @@
 
     // ===== 4. 2D / 3D =====
     btn3d.addEventListener('click', function () {
-      viewer.scene.morphTo3D(1.5);
+      viewer.scene.morphTo3D(1.2);
       setModeButton('3d');
     });
 
     btn2d.addEventListener('click', function () {
-      viewer.scene.morphTo2D(1.5);
+      viewer.scene.morphTo2D(1.2);
       setModeButton('2d');
     });
 
-    // ===== 5. Waktu =====
+    // ===== 5. Waktu siang–malam =====
     function updateTimeFromSlider() {
       const hour = parseInt(timeSlider.value, 10);
       const now = Cesium.JulianDate.now();
@@ -325,7 +393,7 @@
       statusEl.textContent = 'Animasi waktu dihentikan. Anda dapat geser slider jam.';
     });
 
-    // ===== 6. Alat ukur =====
+    // ===== 6. Alat ukur jarak & luas =====
     let measureMode = null;
     let measurePositions = [];
     let measureShapeEntity = null;
