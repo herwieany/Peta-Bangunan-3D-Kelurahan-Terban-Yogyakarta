@@ -1,654 +1,514 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peta Bangunan Kelurahan Terban, Yogyakarta</title>
-    <!-- CesiumJS CSS dan JS -->
-    <script src="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Cesium.js"></script>
-    <link href="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            overflow: hidden;
-            background-color: #0a1f2d;
-            color: #f0f0f0;
-        }
-        
-        #header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: rgba(10, 31, 45, 0.9);
-            padding: 15px 20px;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-            border-bottom: 2px solid #2a9fd6;
-        }
-        
-        #title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
-        }
-        
-        #title span {
-            color: #2a9fd6;
-        }
-        
-        #controls {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-        
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        .control-label {
-            font-size: 0.85rem;
-            color: #a0c8e0;
-            font-weight: 600;
-        }
-        
-        .btn {
-            background-color: #1a3b4d;
-            color: #ffffff;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .btn:hover {
-            background-color: #2a9fd6;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-        
-        .btn.active {
-            background-color: #2a9fd6;
-            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
-        }
-        
-        .btn i {
-            font-size: 1.1rem;
-        }
-        
-        #cesiumContainer {
-            position: absolute;
-            top: 80px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            overflow: hidden;
-        }
-        
-        #instructions {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background-color: rgba(10, 31, 45, 0.85);
-            border-radius: 8px;
-            padding: 15px;
-            max-width: 300px;
-            z-index: 999;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-            border-left: 4px solid #2a9fd6;
-        }
-        
-        #instructions h3 {
-            margin-bottom: 10px;
-            color: #2a9fd6;
-            font-size: 1.2rem;
-        }
-        
-        #instructions ul {
-            margin-left: 15px;
-            color: #d0e6f7;
-            font-size: 0.9rem;
-        }
-        
-        #instructions li {
-            margin-bottom: 8px;
-        }
-        
-        #status {
-            position: absolute;
-            top: 100px;
-            right: 20px;
-            background-color: rgba(10, 31, 45, 0.85);
-            border-radius: 8px;
-            padding: 12px 15px;
-            z-index: 999;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-            border-left: 4px solid #4caf50;
-            font-size: 0.9rem;
-            max-width: 250px;
-        }
-        
-        #status h3 {
-            color: #4caf50;
-            margin-bottom: 5px;
-            font-size: 1rem;
-        }
-        
-        .mode-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-        
-        .day-mode {
-            background-color: #ffcc00;
-            box-shadow: 0 0 8px #ffcc00;
-        }
-        
-        .night-mode {
-            background-color: #2a9fd6;
-            box-shadow: 0 0 8px #2a9fd6;
-        }
-        
-        .cesium-widget-credits {
-            display: none !important;
-        }
-        
-        @media (max-width: 768px) {
-            #header {
-                flex-direction: column;
-                gap: 10px;
-                padding: 10px;
-            }
-            
-            #title {
-                font-size: 1.4rem;
-            }
-            
-            #controls {
-                width: 100%;
-                justify-content: space-between;
-            }
-            
-            #instructions, #status {
-                max-width: 200px;
-                font-size: 0.8rem;
-            }
-            
-            #cesiumContainer {
-                top: 120px;
-            }
-        }
-    </style>
-    <!-- Ikon FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="utf-8" />
+  <title>Peta Bangunan Kelurahan Terban, Yogyakarta</title>
+
+  <!-- CesiumJS dari CDN -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js"></script>
+  <link
+    href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css"
+    rel="stylesheet"
+  />
+
+  <style>
+    html, body, #cesiumContainer {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #e0f2ff 0, #c0ccf2 45%, #8a9ac4 100%);
+    }
+
+    /* Judul peta */
+    #map-title {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9;
+      padding: 6px 20px;
+      background: linear-gradient(120deg, rgba(40, 120, 230, 0.98), rgba(132, 210, 255, 0.96));
+      color: #ffffff;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 650;
+      letter-spacing: 0.06em;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* Panel kontrol (glass, biru) */
+    #toolbar {
+      position: absolute;
+      top: 58px;
+      left: 16px;
+      z-index: 10;
+      padding: 12px 14px;
+      min-width: 280px;
+
+      background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.9), rgba(230, 243, 255, 0.93));
+      border-radius: 18px;
+      box-shadow:
+        0 18px 45px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.9);
+      color: #1c2435;
+    }
+
+    #toolbar h1 {
+      font-size: 13px;
+      margin: 0 0 6px 0;
+      font-weight: 650;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #2956a3;
+    }
+
+    #toolbar section {
+      margin-top: 6px;
+      border-top: 1px solid rgba(120, 140, 190, 0.35);
+      padding-top: 6px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    button.mode-btn {
+      flex: 1;
+      border: none;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 12px;
+      cursor: pointer;
+      background: rgba(230, 238, 255, 0.9);
+      color: #1f2937;
+      transition: background 0.18s, transform 0.1s, box-shadow 0.1s;
+      box-shadow: 0 0 0 1px rgba(148, 163, 209, 0.6);
+    }
+
+    button.mode-btn.active {
+      background: linear-gradient(120deg, #2563eb, #60a5fa);
+      color: #f9fafb;
+      box-shadow:
+        0 0 0 1px rgba(191, 219, 254, 0.9),
+        0 8px 18px rgba(15, 23, 42, 0.45);
+    }
+
+    button.mode-btn:hover {
+      background: rgba(209, 226, 255, 0.95);
+      transform: translateY(-1px);
+    }
+
+    .label-inline {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-bottom: 2px;
+      opacity: 0.9;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #2563eb;
+    }
+
+    #time-display {
+      font-size: 11px;
+      margin-top: 2px;
+      opacity: 0.9;
+      text-align: right;
+    }
+
+    #status, #measure-info {
+      font-size: 11px;
+      margin-top: 4px;
+      opacity: 0.8;
+    }
+
+    /* Hint bawah kiri */
+    #hint-badge {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      z-index: 8;
+      padding: 6px 10px;
+      font-size: 11px;
+      color: #0f172a;
+      background: rgba(239, 246, 255, 0.96);
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 209, 0.7);
+      max-width: 260px;
+      line-height: 1.35;
+    }
+  </style>
 </head>
 <body>
-    <div id="header">
-        <div id="title">
-            <i class="fas fa-map-marked-alt"></i> Peta <span>Bangunan Kelurahan Terban, Yogyakarta</span>
-        </div>
-        <div id="controls">
-            <div class="control-group">
-                <div class="control-label">TAMPILAN PETA</div>
-                <div>
-                    <button id="toggle3D" class="btn active"><i class="fas fa-globe-americas"></i> 3D</button>
-                    <button id="toggle2D" class="btn"><i class="fas fa-map"></i> 2D</button>
-                </div>
-            </div>
-            <div class="control-group">
-                <div class="control-label">WAKTU</div>
-                <div>
-                    <button id="dayMode" class="btn active"><i class="fas fa-sun"></i> Siang</button>
-                    <button id="nightMode" class="btn"><i class="fas fa-moon"></i> Malam</button>
-                </div>
-            </div>
-            <div class="control-group">
-                <div class="control-label">ALAT UKUR</div>
-                <div>
-                    <button id="measureLength" class="btn"><i class="fas fa-ruler"></i> Panjang</button>
-                    <button id="measureArea" class="btn"><i class="fas fa-vector-square"></i> Luas</button>
-                </div>
-            </div>
-            <button id="resetView" class="btn"><i class="fas fa-home"></i> Reset View</button>
-        </div>
-    </div>
-    
-    <div id="cesiumContainer"></div>
-    
-    <div id="instructions">
-        <h3><i class="fas fa-info-circle"></i> Petunjuk Penggunaan</h3>
-        <ul>
-            <li>Gunakan mouse untuk menggeser, zoom, dan rotasi peta</li>
-            <li>Klik tombol <strong>Panjang</strong> untuk mengukur jarak</li>
-            <li>Klik tombol <strong>Luas</strong> untuk mengukur area</li>
-            <li>Tombol <strong>Siang/Malam</strong> mengubah waktu tampilan</li>
-            <li>Tombol <strong>Reset View</strong> kembali ke lokasi awal</li>
-        </ul>
-    </div>
-    
-    <div id="status">
-        <h3><i class="fas fa-map-pin"></i> Status Peta</h3>
-        <div><span class="mode-indicator day-mode"></span> Mode: <span id="viewMode">3D</span></div>
-        <div><span class="mode-indicator day-mode"></span> Waktu: <span id="timeMode">Siang</span></div>
-        <div><i class="fas fa-ruler-combined"></i> Alat Ukur: <span id="measureMode">Tidak Aktif</span></div>
-    </div>
+  <!-- Judul peta -->
+  <div id="map-title">Peta Bangunan Kelurahan Terban, Yogyakarta</div>
 
-    <script>
-        // Cesium Ion Token - Gunakan token default untuk akses ke data Cesium World Terrain dan Bing Maps
-        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjYyZTciLCJpZCI6MjAwMzA1LCJpYXQiOjE3MTE4MTI0OTR9.8C5t_9JxXI8Uzwt-JgOaYfXJNfKf5oDPn-zTGTaU7i0';
-        
-        // Inisialisasi viewer Cesium
-        const viewer = new Cesium.Viewer('cesiumContainer', {
-            terrainProvider: Cesium.createWorldTerrain(),
-            baseLayerPicker: false,
-            animation: false,
-            timeline: false,
-            sceneModePicker: false,
-            navigationHelpButton: false,
-            geocoder: false,
-            homeButton: false,
-            fullscreenButton: false,
-            infoBox: false,
-            selectionIndicator: false,
-            shadows: true,
-            shouldAnimate: true,
-            imageryProvider: new Cesium.IonImageryProvider({ assetId: 2 }) // Bing Maps Aerial
-        });
-        
-        // Hilangkan logo Cesium
-        viewer.cesiumWidget.creditContainer.style.display = "none";
-        
-        // Koordinat Kelurahan Terban, Yogyakarta
-        const terbanPosition = Cesium.Cartesian3.fromDegrees(110.376, -7.774, 500);
-        
-        // Set tampilan awal ke lokasi Terban dengan ketinggian tertentu
-        viewer.camera.setView({
-            destination: terbanPosition,
-            orientation: {
-                heading: Cesium.Math.toRadians(0),
-                pitch: Cesium.Math.toRadians(-30),
-                roll: 0.0
-            }
-        });
-        
-        // Tambahkan penanda lokasi Terban
-        const terbanEntity = viewer.entities.add({
-            position: Cesium.Cartesian3.fromDegrees(110.376, -7.774),
-            point: {
-                pixelSize: 15,
-                color: Cesium.Color.RED,
-                outlineColor: Cesium.Color.WHITE,
-                outlineWidth: 2
-            },
-            label: {
-                text: "Kelurahan Terban, Yogyakarta",
-                font: "14pt sans-serif",
-                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                outlineWidth: 2,
-                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                pixelOffset: new Cesium.Cartesian2(0, -10)
-            },
-            description: `<div style="padding: 10px; max-width: 300px;">
-                            <h3 style="margin-top:0; color: #2a9fd6;">Kelurahan Terban, Yogyakarta</h3>
-                            <p>Kelurahan Terban terletak di Kecamatan Gondokusuman, Kota Yogyakarta, Daerah Istimewa Yogyakarta.</p>
-                            <p>Koordinat: -7.774° LS, 110.376° BT</p>
-                            <p>Wilayah ini dikenal dengan banyaknya bangunan pendidikan dan kampus.</p>
-                         </div>`
-        });
-        
-        // Tambahkan beberapa bangunan di sekitar Terban sebagai contoh
-        const buildings = [
-            { name: "Universitas Gadjah Mada", lon: 110.377, lat: -7.773, height: 50 },
-            { name: "RSUP Dr. Sardjito", lon: 110.374, lat: -7.775, height: 40 },
-            { name: "Mall Malioboro", lon: 110.368, lat: -7.792, height: 35 },
-            { name: "Kantor Kelurahan Terban", lon: 110.3765, lat: -7.7745, height: 20 },
-            { name: "SMA Negeri 3 Yogyakarta", lon: 110.379, lat: -7.778, height: 25 },
-            { name: "Pasar Kranggan", lon: 110.371, lat: -7.798, height: 30 }
-        ];
-        
-        buildings.forEach(building => {
-            viewer.entities.add({
-                position: Cesium.Cartesian3.fromDegrees(building.lon, building.lat),
-                cylinder: {
-                    length: building.height,
-                    topRadius: 0.001,
-                    bottomRadius: 0.0015,
-                    material: Cesium.Color.fromRandom({ alpha: 0.8 }),
-                    outline: true,
-                    outlineColor: Cesium.Color.BLACK
-                },
-                label: {
-                    text: building.name,
-                    font: "12pt sans-serif",
-                    style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                    outlineWidth: 1,
-                    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                    pixelOffset: new Cesium.Cartesian2(0, -building.height*5000)
-                }
-            });
-        });
-        
-        // Variabel untuk menyimpan state
-        let is3DMode = true;
-        let isDayTime = true;
-        let isMeasuringLength = false;
-        let isMeasuringArea = false;
-        let measureHandler;
-        
-        // Fungsi untuk mengubah mode tampilan (3D/2D)
-        document.getElementById('toggle3D').addEventListener('click', function() {
-            if (!is3DMode) {
-                viewer.scene.morphTo3D(2);
-                is3DMode = true;
-                this.classList.add('active');
-                document.getElementById('toggle2D').classList.remove('active');
-                document.getElementById('viewMode').textContent = '3D';
-            }
-        });
-        
-        document.getElementById('toggle2D').addEventListener('click', function() {
-            if (is3DMode) {
-                viewer.scene.morphTo2D(2);
-                is3DMode = false;
-                this.classList.add('active');
-                document.getElementById('toggle3D').classList.remove('active');
-                document.getElementById('viewMode').textContent = '2D';
-            }
-        });
-        
-        // Fungsi untuk mengubah waktu (siang/malam)
-        document.getElementById('dayMode').addEventListener('click', function() {
-            if (!isDayTime) {
-                // Set waktu ke siang hari
-                viewer.clock.currentTime = Cesium.JulianDate.fromDate(new Date(2023, 5, 15, 12, 0, 0));
-                isDayTime = true;
-                this.classList.add('active');
-                document.getElementById('nightMode').classList.remove('active');
-                document.getElementById('timeMode').textContent = 'Siang';
-            }
-        });
-        
-        document.getElementById('nightMode').addEventListener('click', function() {
-            if (isDayTime) {
-                // Set waktu ke malam hari
-                viewer.clock.currentTime = Cesium.JulianDate.fromDate(new Date(2023, 5, 15, 22, 0, 0));
-                isDayTime = false;
-                this.classList.add('active');
-                document.getElementById('dayMode').classList.remove('active');
-                document.getElementById('timeMode').textContent = 'Malam';
-            }
-        });
-        
-        // Fungsi untuk mengukur panjang
-        document.getElementById('measureLength').addEventListener('click', function() {
-            if (isMeasuringLength) {
-                // Nonaktifkan pengukuran
-                deactivateMeasurement();
-                this.classList.remove('active');
-                document.getElementById('measureMode').textContent = 'Tidak Aktif';
-            } else {
-                // Aktifkan pengukuran panjang
-                deactivateMeasurement();
-                isMeasuringLength = true;
-                this.classList.add('active');
-                document.getElementById('measureArea').classList.remove('active');
-                document.getElementById('measureMode').textContent = 'Panjang';
-                
-                // Aktifkan alat ukur panjang Cesium
-                measureHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
-                let positions = [];
-                let polyline;
-                let labels = [];
-                
-                measureHandler.setInputAction(function(click) {
-                    const earthPosition = viewer.scene.pickPosition(click.position);
-                    if (Cesium.defined(earthPosition)) {
-                        positions.push(earthPosition);
-                        
-                        if (positions.length === 1) {
-                            // Buat polyline untuk pengukuran
-                            polyline = viewer.entities.add({
-                                polyline: {
-                                    positions: new Cesium.CallbackProperty(function() {
-                                        return positions;
-                                    }, false),
-                                    width: 3,
-                                    material: Cesium.Color.YELLOW
-                                }
-                            });
-                        } else if (positions.length > 1) {
-                            // Hitung jarak antara dua titik terakhir
-                            const lastPoint = positions[positions.length - 2];
-                            const currentPoint = positions[positions.length - 1];
-                            const distance = Cesium.Cartesian3.distance(lastPoint, currentPoint);
-                            
-                            // Tambahkan label untuk jarak
-                            const labelPosition = Cesium.Cartesian3.midpoint(lastPoint, currentPoint, new Cesium.Cartesian3());
-                            const label = viewer.entities.add({
-                                position: labelPosition,
-                                label: {
-                                    text: (distance / 1000).toFixed(2) + ' km',
-                                    font: '14px sans-serif',
-                                    fillColor: Cesium.Color.WHITE,
-                                    outlineColor: Cesium.Color.BLACK,
-                                    outlineWidth: 2,
-                                    style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                                    pixelOffset: new Cesium.Cartesian2(0, -20)
-                                }
-                            });
-                            labels.push(label);
-                            
-                            // Hitung total jarak jika ada lebih dari 2 titik
-                            if (positions.length > 2) {
-                                let totalDistance = 0;
-                                for (let i = 1; i < positions.length; i++) {
-                                    totalDistance += Cesium.Cartesian3.distance(positions[i-1], positions[i]);
-                                }
-                                
-                                // Update label terakhir dengan total jarak
-                                if (labels.length > 0) {
-                                    const lastLabel = labels[labels.length - 1];
-                                    lastLabel.label.text = (distance / 1000).toFixed(2) + ' km\nTotal: ' + (totalDistance / 1000).toFixed(2) + ' km';
-                                }
-                            }
-                        }
-                    }
-                }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-                
-                // Klik kanan untuk mengakhiri pengukuran
-                measureHandler.setInputAction(function() {
-                    deactivateMeasurement();
-                    document.getElementById('measureLength').classList.remove('active');
-                    document.getElementById('measureMode').textContent = 'Tidak Aktif';
-                }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
-            }
-        });
-        
-        // Fungsi untuk mengukur luas
-        document.getElementById('measureArea').addEventListener('click', function() {
-            if (isMeasuringArea) {
-                // Nonaktifkan pengukuran
-                deactivateMeasurement();
-                this.classList.remove('active');
-                document.getElementById('measureMode').textContent = 'Tidak Aktif';
-            } else {
-                // Aktifkan pengukuran luas
-                deactivateMeasurement();
-                isMeasuringArea = true;
-                this.classList.add('active');
-                document.getElementById('measureLength').classList.remove('active');
-                document.getElementById('measureMode').textContent = 'Luas';
-                
-                // Aktifkan alat ukur luas
-                measureHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
-                let positions = [];
-                let polygon;
-                let areaLabel;
-                
-                measureHandler.setInputAction(function(click) {
-                    const earthPosition = viewer.scene.pickPosition(click.position);
-                    if (Cesium.defined(earthPosition)) {
-                        positions.push(earthPosition);
-                        
-                        if (positions.length === 1) {
-                            // Buat polygon untuk pengukuran luas
-                            polygon = viewer.entities.add({
-                                polygon: {
-                                    hierarchy: new Cesium.CallbackProperty(function() {
-                                        return new Cesium.PolygonHierarchy(positions);
-                                    }, false),
-                                    material: Cesium.Color.YELLOW.withAlpha(0.3),
-                                    outline: true,
-                                    outlineColor: Cesium.Color.YELLOW,
-                                    outlineWidth: 3
-                                }
-                            });
-                        } else if (positions.length >= 3) {
-                            // Hitung luas area
-                            const area = Cesium.PolygonGeometry.computeArea(positions);
-                            const areaKm2 = area / 1000000;
-                            
-                            // Buat atau update label luas
-                            if (!areaLabel) {
-                                // Cari centroid untuk posisi label
-                                const centroid = computeCentroid(positions);
-                                areaLabel = viewer.entities.add({
-                                    position: centroid,
-                                    label: {
-                                        text: areaKm2.toFixed(3) + ' km²',
-                                        font: '14px sans-serif',
-                                        fillColor: Cesium.Color.WHITE,
-                                        outlineColor: Cesium.Color.BLACK,
-                                        outlineWidth: 2,
-                                        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                                        pixelOffset: new Cesium.Cartesian2(0, 0)
-                                    }
-                                });
-                            } else {
-                                const centroid = computeCentroid(positions);
-                                areaLabel.position = centroid;
-                                areaLabel.label.text = areaKm2.toFixed(3) + ' km²';
-                            }
-                        }
-                    }
-                }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-                
-                // Klik kanan untuk mengakhiri pengukuran
-                measureHandler.setInputAction(function() {
-                    deactivateMeasurement();
-                    document.getElementById('measureArea').classList.remove('active');
-                    document.getElementById('measureMode').textContent = 'Tidak Aktif';
-                }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
-            }
-        });
-        
-        // Fungsi untuk menghitung centroid dari array posisi
-        function computeCentroid(positions) {
-            const centroid = new Cesium.Cartesian3();
-            for (let i = 0; i < positions.length; i++) {
-                Cesium.Cartesian3.add(centroid, positions[i], centroid);
-            }
-            Cesium.Cartesian3.divideByScalar(centroid, positions.length, centroid);
-            return centroid;
+  <!-- Panel kontrol -->
+  <div id="toolbar">
+    <h1>SCENE CONTROLLER</h1>
+
+    <!-- Mode tampilan -->
+    <section>
+      <div class="label-inline">
+        <span>Mode Tampilan</span>
+        <span id="mode-label">3D</span>
+      </div>
+      <div class="btn-group">
+        <button id="btn3d" class="mode-btn active">3D</button>
+        <button id="btn2d" class="mode-btn">2D</button>
+      </div>
+    </section>
+
+    <!-- Waktu siang–malam -->
+    <section>
+      <div class="label-inline">
+        <span>Waktu (siang–malam)</span>
+        <span>Jam (UTC)</span>
+      </div>
+      <input id="timeSlider" type="range" min="0" max="23" step="1" value="10" />
+      <div id="time-display">Jam 10:00 UTC</div>
+      <div class="btn-group" style="margin-top: 6px;">
+        <button id="btnPlayTime" class="mode-btn">Animasi</button>
+        <button id="btnPauseTime" class="mode-btn">Pause</button>
+      </div>
+    </section>
+
+    <!-- Tools pengukuran + zoom -->
+    <section>
+      <div class="label-inline">
+        <span>Tools Pengukuran</span>
+        <span id="measure-label">Off</span>
+      </div>
+      <div class="btn-group">
+        <button id="btnMeasureDistance" class="mode-btn">Panjang</button>
+        <button id="btnMeasureArea" class="mode-btn">Luas</button>
+      </div>
+      <div class="btn-group" style="margin-top: 4px;">
+        <button id="btnMeasureClear" class="mode-btn">Clear</button>
+        <button id="btnZoomToData" class="mode-btn">Zoom ke Data</button>
+      </div>
+      <div id="measure-info">
+        Pilih mode, lalu klik di peta untuk menambah titik. Klik kanan untuk selesai.
+      </div>
+    </section>
+
+    <div id="status">Memuat data…</div>
+  </div>
+
+  <!-- Hint -->
+  <div id="hint-badge">
+    Gunakan <b>3D / 2D</b> untuk mengubah tampilan, slider untuk siang–malam, dan mode
+    <b>Panjang</b> atau <b>Luas</b> untuk analisis di sekitar bangunan Kelurahan Terban.
+  </div>
+
+  <!-- Container Cesium -->
+  <div id="cesiumContainer"></div>
+
+  <script>
+    // ===== 1. Token & Asset ID =====
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwNTY2Y2Y1Ni02YWUyLTQ1OWQtODcyYi1lZGM5OTJhOWI1OWQiLCJpZCI6MjEzNjk3LCJpYXQiOjE3NjU4NjA2NzF9.37HTp-nTHxNr4umeQruV45iHJnaxmJsS94B_yUIdm28'; // GANTI
+
+    const ASSET_ID_3D = 4224210;   // ganti dengan asset 3D Anda
+    const ASSET_ID_2D = 4224206;   // ganti dengan asset 2D Anda
+
+    // ===== 2. Inisialisasi viewer =====
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+      terrain: Cesium.Terrain.fromWorldTerrain(),
+      animation: true,
+      timeline: true,
+      sceneMode: Cesium.SceneMode.SCENE3D,
+      geocoder: false,
+      homeButton: true,
+      sceneModePicker: true,
+      baseLayerPicker: true,
+      navigationHelpButton: false,
+      fullscreenButton: true
+    });
+
+    // Ganti basemap default ke peta jalan (bukan citra satelit)
+    (async function () {
+      const roadImagery = await Cesium.createWorldImageryAsync({
+        style: Cesium.IonWorldImageryStyle.ROAD
+      });
+      viewer.imageryLayers.removeAll();
+      viewer.imageryLayers.addImageryProvider(roadImagery);
+    })();
+
+    viewer.scene.globe.enableLighting = true;
+    viewer.shadows = true;
+    viewer.clock.shouldAnimate = false;
+
+    const statusEl = document.getElementById('status');
+    const modeLabelEl = document.getElementById('mode-label');
+    const btn3d = document.getElementById('btn3d');
+    const btn2d = document.getElementById('btn2d');
+    const timeSlider = document.getElementById('timeSlider');
+    const timeDisplay = document.getElementById('time-display');
+    const btnPlayTime = document.getElementById('btnPlayTime');
+    const btnPauseTime = document.getElementById('btnPauseTime');
+
+    const btnMeasureDistance = document.getElementById('btnMeasureDistance');
+    const btnMeasureArea = document.getElementById('btnMeasureArea');
+    const btnMeasureClear = document.getElementById('btnMeasureClear');
+    const btnZoomToData = document.getElementById('btnZoomToData');
+    const measureLabelEl = document.getElementById('measure-label');
+    const measureInfoEl = document.getElementById('measure-info');
+
+    function setModeButton(active) {
+      if (active === '3d') {
+        btn3d.classList.add('active');
+        btn2d.classList.remove('active');
+        modeLabelEl.textContent = '3D';
+      } else {
+        btn2d.classList.add('active');
+        btn3d.classList.remove('active');
+        modeLabelEl.textContent = '2D';
+      }
+    }
+
+    // ===== 3. Muat data & zoom default ke Terban =====
+    let tileset3D = null;
+    let dataSource2D = null;
+
+    async function loadData() {
+      try {
+        statusEl.textContent = 'Memuat 3D Tiles…';
+        tileset3D = await Cesium.Cesium3DTileset.fromIonAssetId(ASSET_ID_3D);
+        viewer.scene.primitives.add(tileset3D);
+
+        statusEl.textContent = 'Memuat data 2D…';
+        dataSource2D = await Cesium.GeoJsonDataSource.fromIonAssetId(ASSET_ID_2D);
+        viewer.dataSources.add(dataSource2D);
+
+        const entities = dataSource2D.entities.values;
+        for (let i = 0; i < entities.length; i++) {
+          const e = entities[i];
+          if (e.polygon) {
+            e.polygon.material = Cesium.Color.fromCssColorString('#fb923c').withAlpha(0.65);
+            e.polygon.outline = true;
+            e.polygon.outlineColor = Cesium.Color.fromCssColorString('#b45309');
+          }
+          if (e.polyline) {
+            e.polyline.width = 2.2;
+            e.polyline.material = Cesium.Color.fromCssColorString('#0ea5e9');
+          }
+          if (e.point) {
+            e.point.pixelSize = 8;
+            e.point.color = Cesium.Color.fromCssColorString('#facc15');
+            e.point.outlineColor = Cesium.Color.fromCssColorString('#1f2937');
+            e.point.outlineWidth = 1;
+          }
         }
-        
-        // Fungsi untuk menonaktifkan semua pengukuran
-        function deactivateMeasurement() {
-            if (measureHandler) {
-                measureHandler.destroy();
-                measureHandler = null;
-            }
-            
-            // Hapus semua entitas pengukuran
-            const entities = viewer.entities.values;
-            for (let i = entities.length - 1; i >= 0; i--) {
-                const entity = entities[i];
-                if (entity.polyline || (entity.polygon && entity !== terbanEntity) || 
-                    (entity.label && entity.label.text && 
-                     (entity.label.text.includes('km') || entity.label.text.includes('km²')))) {
-                    viewer.entities.remove(entity);
-                }
-            }
-            
-            isMeasuringLength = false;
-            isMeasuringArea = false;
-        }
-        
-        // Fungsi untuk reset view ke lokasi awal
-        document.getElementById('resetView').addEventListener('click', function() {
-            viewer.camera.flyTo({
-                destination: terbanPosition,
-                orientation: {
-                    heading: Cesium.Math.toRadians(0),
-                    pitch: Cesium.Math.toRadians(-30),
-                    roll: 0.0
-                },
-                duration: 2
-            });
-            
-            // Reset semua pengukuran
-            deactivateMeasurement();
-            document.getElementById('measureLength').classList.remove('active');
-            document.getElementById('measureArea').classList.remove('active');
-            document.getElementById('measureMode').textContent = 'Tidak Aktif';
+
+        // Zoom awal langsung ke bounding sphere 3D Tiles
+        const bs = tileset3D.boundingSphere;
+        viewer.camera.flyToBoundingSphere(bs, {
+          duration: 0.0,
+          offset: new Cesium.HeadingPitchRange(
+            Cesium.Math.toRadians(-35.0),
+            Cesium.Math.toRadians(-35.0),
+            bs.radius * 2.5
+          )
         });
-        
-        // Inisialisasi waktu ke siang hari
-        viewer.clock.currentTime = Cesium.JulianDate.fromDate(new Date(2023, 5, 15, 12, 0, 0));
-        
-        // Tambahkan info lokasi saat ini di pojok kanan bawah
-        const locationDisplay = document.createElement('div');
-        locationDisplay.style.position = 'absolute';
-        locationDisplay.style.bottom = '10px';
-        locationDisplay.style.right = '10px';
-        locationDisplay.style.backgroundColor = 'rgba(10, 31, 45, 0.8)';
-        locationDisplay.style.padding = '8px 12px';
-        locationDisplay.style.borderRadius = '4px';
-        locationDisplay.style.fontSize = '12px';
-        locationDisplay.style.zIndex = '999';
-        locationDisplay.innerHTML = '<i class="fas fa-location-dot"></i> Koordinat: Memuat...';
-        document.body.appendChild(locationDisplay);
-        
-        // Update koordinat saat mouse bergerak di peta
-        const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
-        handler.setInputAction(function(movement) {
-            const cartesian = viewer.camera.pickEllipsoid(movement.endPosition, viewer.scene.globe.ellipsoid);
-            if (cartesian) {
-                const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
-                const lon = Cesium.Math.toDegrees(cartographic.longitude).toFixed(6);
-                const lat = Cesium.Math.toDegrees(cartographic.latitude).toFixed(6);
-                locationDisplay.innerHTML = `<i class="fas fa-location-dot"></i> Lon: ${lon}°, Lat: ${lat}°`;
+
+        // Set tombol Home kembali ke area Terban
+        viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (e) {
+          e.cancel = true;
+          viewer.camera.flyToBoundingSphere(bs, {
+            duration: 1.2,
+            offset: new Cesium.HeadingPitchRange(
+              Cesium.Math.toRadians(-35.0),
+              Cesium.Math.toRadians(-35.0),
+              bs.radius * 2.5
+            )
+          });
+        });
+
+        statusEl.textContent = 'Data siap. Gunakan panel untuk ganti mode, waktu, dan pengukuran.';
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = 'Gagal memuat data. Cek Asset ID dan token.';
+      }
+    }
+
+    loadData();
+
+    // Zoom ke data via tombol
+    btnZoomToData.addEventListener('click', function () {
+      if (tileset3D) {
+        const bs = tileset3D.boundingSphere;
+        viewer.camera.flyToBoundingSphere(bs, {
+          duration: 1.2,
+          offset: new Cesium.HeadingPitchRange(
+            Cesium.Math.toRadians(-35.0),
+            Cesium.Math.toRadians(-35.0),
+            bs.radius * 2.5
+          )
+        });
+      } else if (dataSource2D) {
+        viewer.flyTo(dataSource2D);
+      }
+    });
+
+    // ===== 4. 2D / 3D =====
+    btn3d.addEventListener('click', function () {
+      viewer.scene.morphTo3D(1.1);
+      setModeButton('3d');
+    });
+
+    btn2d.addEventListener('click', function () {
+      viewer.scene.morphTo2D(1.1);
+      setModeButton('2d');
+    });
+
+    // ===== 5. Waktu siang–malam =====
+    function updateTimeFromSlider() {
+      const hour = parseInt(timeSlider.value, 10);
+      const now = Cesium.JulianDate.now();
+      const gregorian = Cesium.JulianDate.toDate(now);
+      gregorian.setUTCHours(hour, 0, 0, 0);
+      const newTime = Cesium.JulianDate.fromDate(gregorian);
+      viewer.clock.currentTime = newTime;
+      viewer.clock.shouldAnimate = false;
+
+      const hourStr = hour.toString().padStart(2, '0');
+      timeDisplay.textContent = `Jam ${hourStr}:00 UTC`;
+    }
+
+    timeSlider.addEventListener('input', updateTimeFromSlider);
+    updateTimeFromSlider();
+
+    btnPlayTime.addEventListener('click', function () {
+      viewer.clock.shouldAnimate = true;
+      viewer.clock.multiplier = 4000;
+      statusEl.textContent = 'Animasi waktu berjalan.';
+    });
+
+    btnPauseTime.addEventListener('click', function () {
+      viewer.clock.shouldAnimate = false;
+      statusEl.textContent = 'Animasi waktu dihentikan. Anda dapat geser slider jam.';
+    });
+
+    // ===== 6. Alat ukur jarak & luas =====
+    let measureMode = null;
+    let measurePositions = [];
+    let measureShapeEntity = null;
+    let measureLabelEntity = null;
+    let measurePointEntities = [];
+
+    function setMeasureMode(mode) {
+      measureMode = mode;
+      if (mode === 'distance') {
+        measureLabelEl.textContent = 'Panjang';
+        btnMeasureDistance.classList.add('active');
+        btnMeasureArea.classList.remove('active');
+        measureInfoEl.textContent = 'Mode panjang: klik di peta untuk membuat garis, klik kanan untuk selesai.';
+      } else if (mode === 'area') {
+        measureLabelEl.textContent = 'Luas';
+        btnMeasureArea.classList.add('active');
+        btnMeasureDistance.classList.remove('active');
+        measureInfoEl.textContent = 'Mode luas: klik di peta untuk membuat poligon, klik kanan untuk selesai.';
+      } else {
+        measureLabelEl.textContent = 'Off';
+        btnMeasureArea.classList.remove('active');
+        btnMeasureDistance.classList.remove('active');
+        measureInfoEl.textContent = 'Pilih mode, lalu klik di peta untuk menambah titik. Klik kanan untuk selesai.';
+      }
+    }
+
+    function clearMeasurement() {
+      measurePositions = [];
+      if (measureShapeEntity) {
+        viewer.entities.remove(measureShapeEntity);
+        measureShapeEntity = null;
+      }
+      if (measureLabelEntity) {
+        viewer.entities.remove(measureLabelEntity);
+        measureLabelEntity = null;
+      }
+      for (const p of measurePointEntities) {
+        viewer.entities.remove(p);
+      }
+      measurePointEntities = [];
+      measureInfoEl.textContent = 'Pengukuran dibersihkan. Pilih mode untuk mulai lagi.';
+    }
+
+    btnMeasureDistance.addEventListener('click', function () {
+      clearMeasurement();
+      setMeasureMode('distance');
+    });
+
+    btnMeasureArea.addEventListener('click', function () {
+      clearMeasurement();
+      setMeasureMode('area');
+    });
+
+    btnMeasureClear.addEventListener('click', function () {
+      clearMeasurement();
+      setMeasureMode(null);
+    });
+
+    const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+
+    handler.setInputAction(function (click) {
+      if (!measureMode) return;
+
+      let cartesian = viewer.scene.pickPosition(click.position);
+      if (!Cesium.defined(cartesian)) {
+        cartesian = viewer.camera.pickEllipsoid(
+          click.position,
+          viewer.scene.globe.ellipsoid
+        );
+      }
+      if (!cartesian) return;
+
+      measurePositions.push(cartesian);
+
+      const point = viewer.entities.add({
+        position: cartesian,
+        point: {
+          pixelSize: 8,
+          color: Cesium.Color.fromCssColorString('#22c55e'),
+          outlineColor: Cesium.Color.fromCssColorString('#111827'),
+          outlineWidth: 1
+        }
+      });
+      measurePointEntities.push(point);
+
+      updateMeasurement();
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+    handler.setInputAction(function () {
+      if (!measureMode) return;
+      measureInfoEl.textContent += '  (Pengukuran selesai, gunakan Clear untuk menghapus.)';
+      measureMode = null;
+      measureLabelEl.textContent = 'Off';
+      btnMeasureArea.classList.remove('active');
+      btnMeasureDistance.classList.remove('active');
+    }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+
+    function updateMeasurement() {
+      if (measureMode === 'distance' && measurePositions.length >= 2) {
+        if (!measureShapeEntity) {
+          measureShapeEntity = viewer.entities.add({
+            polyline: {
+              positions: measurePositions,
+              width: 3,
+              material: Cesium.Color.fromCssColorString('#22c55e')
             }
-        }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-        
-        // Tambahkan event listener untuk membersihkan pengukuran saat mode berubah
-        document.getElementById('toggle3D').addEventListener('click', deactivateMeasurement);
-        document.getElementById('toggle2D').addEventListener('click', deactivateMeasurement);
-        document.getElementById('dayMode').addEventListener('click', deactivateMeasurement);
-        document.getElementById('nightMode').addEventListener('click', deactivateMeasurement);
-        
-        console.log("Peta 3D Kelurahan Terban, Yogyakarta siap digunakan!");
-    </script>
-</body>
-</html>
+          });
+        }
+
+        const ellipsoid = Cesium.Ellipsoid.WGS84;
+        let total = 0.0;
+        for (let i = 1; i < measurePositions.length; i++) {
+          const c1 = ellipsoid.cart
