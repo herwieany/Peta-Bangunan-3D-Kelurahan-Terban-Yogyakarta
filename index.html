@@ -1,17 +1,291 @@
-<div id="cesiumContainer"></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>WebGIS 2D / 3D dengan Siang–Malam</title>
 
-html, body, #cesiumContainer {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-}
+  <!-- 1. Load CesiumJS dari CDN -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js"></script>
+  <link
+    href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css"
+    rel="stylesheet"
+  />
 
-<script src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js"></script>
-<link href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+  <!-- 2. Style tampilan -->
+  <style>
+    html, body, #cesiumContainer {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
 
-Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwNTY2Y2Y1Ni02YWUyLTQ1OWQtODcyYi1lZGM5OTJhOWI1OWQiLCJpZCI6MjEzNjk3LCJpYXQiOjE3NjU4NjA2NzF9.37HTp-nTHxNr4umeQruV45iHJnaxmJsS94B_yUIdm28';
-const ASSET_ID_3D =  4224210;
-const ASSET_ID_2D =  4224206;
+    /* Panel kontrol di kiri atas */
+    #toolbar {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 10;
+      background: rgba(20, 20, 20, 0.85);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+      min-width: 230px;
+    }
 
+    #toolbar h1 {
+      font-size: 14px;
+      margin: 0 0 6px 0;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: #ffd27f;
+    }
+
+    #toolbar section {
+      margin-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding-top: 6px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    button.mode-btn {
+      flex: 1;
+      border: none;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      background: #2f2f2f;
+      color: #fff;
+      transition: background 0.2s, transform 0.1s, box-shadow 0.1s;
+    }
+
+    button.mode-btn.active {
+      background: #ffb347;
+      color: #1b1b1b;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+    }
+
+    button.mode-btn:hover {
+      background: #444;
+      transform: translateY(-1px);
+    }
+
+    .label-inline {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-bottom: 2px;
+      opacity: 0.8;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    #time-display {
+      font-size: 11px;
+      margin-top: 2px;
+      opacity: 0.9;
+      text-align: right;
+    }
+
+    #status {
+      font-size: 11px;
+      margin-top: 4px;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <!-- Panel kontrol -->
+  <div id="toolbar">
+    <h1>Scene Controller</h1>
+
+    <section>
+      <div class="label-inline">
+        <span>Mode Tampilan</span>
+        <span id="mode-label">3D</span>
+      </div>
+      <div class="btn-group">
+        <button id="btn3d" class="mode-btn active">3D</button>
+        <button id="btn2d" class="mode-btn">2D</button>
+      </div>
+    </section>
+
+    <section>
+      <div class="label-inline">
+        <span>Waktu (siang–malam)</span>
+        <span>Jam (UTC)</span>
+      </div>
+      <input id="timeSlider" type="range" min="0" max="23" step="1" value="10" />
+      <div id="time-display">Jam 10:00 UTC</div>
+      <div class="btn-group" style="margin-top: 6px;">
+        <button id="btnPlayTime" class="mode-btn">Animasi</button>
+        <button id="btnPauseTime" class="mode-btn">Pause</button>
+      </div>
+    </section>
+
+    <div id="status">Memuat data…</div>
+  </div>
+
+  <!-- Container Cesium -->
+  <div id="cesiumContainer"></div>
+
+  <!-- Script utama -->
+  <script>
+    // ===== 1. Token Cesium ion =====
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwNTY2Y2Y1Ni02YWUyLTQ1OWQtODcyYi1lZGM5OTJhOWI1OWQiLCJpZCI6MjEzNjk3LCJpYXQiOjE3NjU4NjA2NzF9.37HTp-nTHxNr4umeQruV45iHJnaxmJsS94B_yUIdm28'; // ganti dengan token kamu
+
+    // ===== 2. Inisialisasi viewer =====
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+      terrain: Cesium.Terrain.fromWorldTerrain(),
+      animation: true,
+      timeline: true,
+      sceneMode: Cesium.SceneMode.SCENE3D,
+      // nonaktifkan beberapa widget jika ingin lebih bersih:
+      geocoder: false,
+      homeButton: true,
+      sceneModePicker: true,   // tetap tampilkan juga picker bawaan
+      baseLayerPicker: true,
+      navigationHelpButton: false,
+      fullscreenButton: true
+    });
+
+    // Pencahayaan dan bayangan untuk efek siang–malam
+    viewer.scene.globe.enableLighting = true;
+    viewer.shadows = true;
+    viewer.clock.shouldAnimate = false; // default: manual dengan slider
+
+    // DOM elements
+    const statusEl = document.getElementById('status');
+    const modeLabelEl = document.getElementById('mode-label');
+    const btn3d = document.getElementById('btn3d');
+    const btn2d = document.getElementById('btn2d');
+    const timeSlider = document.getElementById('timeSlider');
+    const timeDisplay = document.getElementById('time-display');
+    const btnPlayTime = document.getElementById('btnPlayTime');
+    const btnPauseTime = document.getElementById('btnPauseTime');
+
+    // Helper: ubah tampilan tombol aktif
+    function setModeButton(active) {
+      if (active === '3d') {
+        btn3d.classList.add('active');
+        btn2d.classList.remove('active');
+        modeLabelEl.textContent = '3D';
+      } else {
+        btn2d.classList.add('active');
+        btn3d.classList.remove('active');
+        modeLabelEl.textContent = '2D';
+      }
+    }
+
+    // ===== 3. Load data 3D dan 2D dari Cesium ion =====
+    // Ganti dengan Asset ID milik kamu
+    const ASSET_ID_3D = 4224210;   // contoh: 3D Tiles bangunan / city model
+    const ASSET_ID_2D = 4224206;   // contoh: GeoJSON 2D (jalan/bangunan/zonasi)
+
+    async function loadData() {
+      try {
+        statusEl.textContent = 'Memuat 3D Tiles…';
+
+        // 3D Tiles (misalnya hasil dari SKP / CityGML / photogrammetry)
+        const tileset = await Cesium.Cesium3DTileset.fromIonAssetId(ASSET_ID_3D);
+        viewer.scene.primitives.add(tileset);
+
+        statusEl.textContent = 'Memuat data 2D…';
+
+        // 2D vektor (GeoJSON dari Cesium ion)
+        const dataSource2D = await Cesium.GeoJsonDataSource.fromIonAssetId(ASSET_ID_2D);
+        viewer.dataSources.add(dataSource2D);
+
+        // Styling sederhana untuk 2D (agar kontras)
+        const entities = dataSource2D.entities.values;
+        for (let i = 0; i < entities.length; i++) {
+          const e = entities[i];
+          if (e.polygon) {
+            e.polygon.material = Cesium.Color.ORANGE.withAlpha(0.6);
+            e.polygon.outline = true;
+            e.polygon.outlineColor = Cesium.Color.DARKRED;
+          }
+          if (e.polyline) {
+            e.polyline.width = 2.0;
+            e.polyline.material = Cesium.Color.CYAN;
+          }
+          if (e.point) {
+            e.point.pixelSize = 8;
+            e.point.color = Cesium.Color.YELLOW;
+            e.point.outlineColor = Cesium.Color.BLACK;
+            e.point.outlineWidth = 1;
+          }
+        }
+
+        // FlyTo gabungan (kamera menyesuaikan ke area 3D Tiles)
+        await viewer.flyTo(tileset);
+
+        statusEl.textContent = 'Data siap. Gunakan panel untuk ganti mode & waktu.';
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = 'Gagal memuat data. Cek Asset ID dan token.';
+      }
+    }
+
+    loadData();
+
+    // ===== 4. Kontrol mode 2D / 3D dengan animasi morph =====
+    btn3d.addEventListener('click', function () {
+      viewer.scene.morphTo3D(1.5); // 1.5 detik morph
+      setModeButton('3d');
+    });
+
+    btn2d.addEventListener('click', function () {
+      viewer.scene.morphTo2D(1.5);
+      setModeButton('2d');
+    });
+
+    // ===== 5. Kontrol siang–malam (jam) dengan slider =====
+    function updateTimeFromSlider() {
+      const hour = parseInt(timeSlider.value, 10);
+
+      // Ambil tanggal hari ini di UTC
+      const now = Cesium.JulianDate.now();
+      const gregorian = Cesium.JulianDate.toDate(now);
+
+      // Set jam UTC sesuai slider
+      gregorian.setUTCHours(hour, 0, 0, 0);
+      const newTime = Cesium.JulianDate.fromDate(gregorian);
+
+      viewer.clock.currentTime = newTime;
+      viewer.clock.shouldAnimate = false; // stop animasi jika user geser manual
+
+      // Update label
+      const hourStr = hour.toString().padStart(2, '0');
+      timeDisplay.textContent = `Jam ${hourStr}:00 UTC`;
+    }
+
+    timeSlider.addEventListener('input', updateTimeFromSlider);
+    updateTimeFromSlider(); // set awal
+
+    // ===== 6. Tombol animasi waktu =====
+    btnPlayTime.addEventListener('click', function () {
+      viewer.clock.shouldAnimate = true;
+      viewer.clock.multiplier = 4000; // percepat waktu (3600 = 1 jam per detik kira-kira)
+      statusEl.textContent = 'Animasi waktu berjalan.';
+    });
+
+    btnPauseTime.addEventListener('click', function () {
+      viewer.clock.shouldAnimate = false;
+      statusEl.textContent = 'Animasi waktu dihentikan. Anda dapat geser slider jam.';
+    });
+  </script>
+</body>
+</html>
