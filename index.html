@@ -1,638 +1,747 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <title>Peta Bangunan Kelurahan Terban, Yogyakarta</title>
-
-  <!-- CesiumJS dari CDN -->
-  <script src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js"></script>
-  <link
-    href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css"
-    rel="stylesheet"
-  />
-
-  <style>
-    html, body, #cesiumContainer {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    body {
-      background: radial-gradient(circle at top, #dfe8ff 0, #a6b7e6 40%, #7f8fc5 70%, #5a6ca5 100%);
-    }
-
-    /* Judul */
-    #map-title {
-      position: absolute;
-      top: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 9;
-      padding: 8px 24px;
-      border-radius: 999px;
-      background: linear-gradient(120deg, #3498ff, #7fd0ff);
-      color: #ffffff;
-      font-size: 15px;
-      font-weight: 650;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
-      white-space: nowrap;
-    }
-
-    /* Panel kontrol kiri */
-    #toolbar {
-      position: absolute;
-      top: 70px;
-      left: 18px;
-      z-index: 10;
-      padding: 14px 16px;
-      min-width: 280px;
-
-      background: rgba(255, 255, 255, 0.90);
-      border-radius: 22px;
-      box-shadow:
-        0 18px 50px rgba(103, 126, 186, 0.55),
-        0 0 0 1px rgba(255, 255, 255, 0.9);
-      color: #1f2933;
-    }
-
-    #toolbar h1 {
-      font-size: 13px;
-      margin: 0 0 8px 0;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #355395;
-    }
-
-    #toolbar section {
-      margin-top: 8px;
-      border-top: 1px solid rgba(148, 163, 184, 0.35);
-      padding-top: 8px;
-    }
-
-    .label-inline {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      margin-bottom: 3px;
-      color: #4b5563;
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 6px;
-      margin-top: 4px;
-    }
-
-    button.mode-btn {
-      flex: 1;
-      border: none;
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 12px;
-      cursor: pointer;
-      background: #ecf0ff;
-      color: #334155;
-      transition: background 0.16s, transform 0.08s, box-shadow 0.08s;
-      box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.45);
-    }
-
-    button.mode-btn.active {
-      background: linear-gradient(120deg, #2563eb, #60a5fa);
-      color: #f9fafb;
-      box-shadow:
-        0 0 0 1px rgba(191, 219, 254, 1),
-        0 10px 22px rgba(37, 99, 235, 0.45);
-    }
-
-    button.mode-btn:hover {
-      background: #dde5ff;
-      transform: translateY(-1px);
-    }
-
-    input[type="range"] {
-      width: 100%;
-      accent-color: #2563eb;
-    }
-
-    #time-display {
-      font-size: 11px;
-      margin-top: 2px;
-      text-align: right;
-      color: #4b5563;
-    }
-
-    #status, #measure-info {
-      font-size: 11px;
-      margin-top: 5px;
-      color: #6b7280;
-    }
-
-    /* Hint di bawah kiri */
-    #hint-badge {
-      position: absolute;
-      left: 18px;
-      bottom: 18px;
-      z-index: 8;
-      padding: 6px 10px;
-      font-size: 11px;
-      color: #f9fafb;
-      background: rgba(15, 23, 42, 0.90);
-      border-radius: 12px;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      max-width: 260px;
-      line-height: 1.35;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peta Bangunan di Kelurahan Terban, Yogyakarta</title>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <script src="https://unpkg.com/h3-js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 100%);
+            color: #e0e1dd;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            padding: 20px;
+            text-align: center;
+            background: rgba(13, 27, 42, 0.9);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border-bottom: 2px solid #415a77;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #778da9;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+            color: #e0e1dd;
+        }
+        
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            gap: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+        
+        .cesium-container {
+            flex: 1 1 800px;
+            height: 600px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        
+        #cesiumViewer {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .controls-panel {
+            flex: 1 1 350px;
+            background: rgba(26, 38, 57, 0.85);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            border: 1px solid #415a77;
+        }
+        
+        .panel-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #415a77;
+        }
+        
+        .panel-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .panel-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #778da9;
+            display: flex;
+            align-items: center;
+        }
+        
+        .panel-section h3 i {
+            margin-right: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e0e1dd;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border: 1px solid #415a77;
+            background: rgba(13, 27, 42, 0.8);
+            color: #e0e1dd;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #778da9;
+            box-shadow: 0 0 0 2px rgba(119, 141, 169, 0.3);
+        }
+        
+        .button {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #415a77 0%, #778da9 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .button:hover {
+            background: linear-gradient(135deg, #778da9 0%, #415a77 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .button.secondary {
+            background: linear-gradient(135deg, #1b263b 0%, #415a77 100%);
+        }
+        
+        .button.secondary:hover {
+            background: linear-gradient(135deg, #415a77 0%, #1b263b 100%);
+        }
+        
+        .grid-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .grid-controls .button {
+            flex: 1;
+        }
+        
+        .h3-info {
+            background: rgba(13, 27, 42, 0.8);
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .h3-info h4 {
+            color: #778da9;
+            margin-bottom: 8px;
+        }
+        
+        .status-panel {
+            background: rgba(13, 27, 42, 0.8);
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            border-left: 4px solid #415a77;
+        }
+        
+        .status-panel h4 {
+            color: #778da9;
+            margin-bottom: 10px;
+        }
+        
+        .status-message {
+            color: #e0e1dd;
+            line-height: 1.5;
+        }
+        
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            margin-right: 8px;
+        }
+        
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .data-card {
+            background: rgba(13, 27, 42, 0.8);
+            border-radius: 6px;
+            padding: 15px;
+            border-top: 3px solid #415a77;
+        }
+        
+        .data-card h5 {
+            color: #778da9;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .data-card p {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #778da9;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 1200px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .cesium-container, .controls-panel {
+                flex: 1 1 auto;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .cesium-container {
+                height: 500px;
+            }
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #778da9;
+            border-top: 1px solid #415a77;
+        }
+    </style>
 </head>
 <body>
-  <div id="map-title">Peta Bangunan Kelurahan Terban, Yogyakarta</div>
+    <div class="header">
+        <h1>Cesium Ion Data Viewer</h1>
+        <p>Tampilkan data 2D dan 3D dari Cesium Ion, lakukan analisis grid dengan H3, dan hubungkan dengan server OGC untuk data tambahan.</p>
+    </div>
+    
+    <div class="container">
+        <div class="cesium-container">
+            <div id="cesiumViewer"></div>
+            <div class="loading" id="loadingIndicator">
+                <div class="spinner"></div>
+                <p>Memuat data dari Cesium Ion...</p>
+            </div>
+        </div>
+        
+        <div class="controls-panel">
+            <div class="panel-section">
+                <h3><i>📡</i> Cesium Ion Asset</h3>
+                <div class="input-group">
+                    <label for="assetId">Asset ID Cesium Ion</label>
+                    <input type="text" id="assetId" value="1" placeholder="4224206">
+                    <small>Contoh: 1 (Bing Maps), 2 (Natural Earth II), 3 (Cesium World Terrain)</small>
+                </div>
+                <button class="button" id="loadAssetBtn">Muat Data dari Cesium Ion</button>
+            </div>
+            
+            <div class="panel-section">
+                <h3><i>🔲</i> Analisis Grid H3</h3>
+                <div class="input-group">
+                    <label for="h3Resolution">Resolusi H3</label>
+                    <select id="h3Resolution">
+                        <option value="0">0 (Terbesar)</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3" selected>3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                        <option value="14">14</option>
+                        <option value="15">15 (Terkecil)</option>
+                    </select>
+                </div>
+                <div class="grid-controls">
+                    <button class="button" id="generateGridBtn">Buat Grid H3</button>
+                    <button class="button secondary" id="clearGridBtn">Hapus Grid</button>
+                </div>
+                
+                <div class="h3-info">
+                    <h4>Info Grid H3</h4>
+                    <p>H3 adalah sistem grid hexagonal dari Uber. Pilih resolusi untuk mengatur ukuran sel grid. Resolusi lebih tinggi berarti sel lebih kecil dan lebih banyak.</p>
+                </div>
+            </div>
+            
+            <div class="panel-section">
+                <h3><i>🌐</i> Server OGC</h3>
+                <div class="input-group">
+                    <label for="ogcServerUrl">URL Server OGC</label>
+                    <input type="text" id="ogcServerUrl" placeholder="https://example.com/geoserver/wms">
+                </div>
+                <div class="input-group">
+                    <label for="ogcLayer">Layer OGC</label>
+                    <input type="text" id="ogcLayer" placeholder="nama_layer">
+                </div>
+                <button class="button" id="loadOGCBtn">Muat Layer OGC</button>
+            </div>
+            
+            <div class="status-panel">
+                <h4>Status Sistem</h4>
+                <div class="status-message" id="statusMessage">Siap. Masukkan Asset ID Cesium Ion untuk memulai.</div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #FF6B6B;"></div>
+                        <span>Data Cesium Ion</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #4ECDC4;"></div>
+                        <span>Grid H3</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #FFD166;"></div>
+                        <span>Data OGC</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="data-grid">
+                <div class="data-card">
+                    <h5>Asset ID Aktif</h5>
+                    <p id="activeAssetId">-</p>
+                </div>
+                <div class="data-card">
+                    <h5>Jumlah Sel H3</h5>
+                    <p id="h3CellCount">0</p>
+                </div>
+                <div class="data-card">
+                    <h5>Layer OGC Aktif</h5>
+                    <p id="activeOGCLayer">-</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Cesium Ion Data Viewer dengan H3 Grid dan OGC Integration | Dibuat dengan CesiumJS dan H3.js</p>
+    </div>
 
-  <div id="toolbar">
-    <h1>SCENE CONTROLLER</h1>
-
-    <section>
-      <div class="label-inline">
-        <span>Mode Tampilan</span>
-        <span id="mode-label">3D</span>
-      </div>
-      <div class="btn-group">
-        <button id="btn3d" class="mode-btn active">3D</button>
-        <button id="btn2d" class="mode-btn">2D</button>
-      </div>
-    </section>
-
-    <section>
-      <div class="label-inline">
-        <span>Waktu (siang–malam)</span>
-        <span>Jam (UTC)</span>
-      </div>
-      <input id="timeSlider" type="range" min="0" max="23" step="1" value="10" />
-      <div id="time-display">Jam 10:00 UTC</div>
-      <div class="btn-group" style="margin-top: 6px;">
-        <button id="btnPlayTime" class="mode-btn">Animasi</button>
-        <button id="btnPauseTime" class="mode-btn">Pause</button>
-      </div>
-    </section>
-
-    <section>
-      <div class="label-inline">
-        <span>Tools Pengukuran</span>
-        <span id="measure-label">Off</span>
-      </div>
-      <div class="btn-group">
-        <button id="btnMeasureDistance" class="mode-btn">Panjang</button>
-        <button id="btnMeasureArea" class="mode-btn">Luas</button>
-      </div>
-      <div class="btn-group" style="margin-top: 4px;">
-        <button id="btnMeasureClear" class="mode-btn">Clear</button>
-        <button id="btnZoomToData" class="mode-btn">Zoom ke Data</button>
-      </div>
-      <div id="measure-info">
-        Pilih mode, lalu klik di peta untuk menambah titik. Klik kanan untuk selesai.
-      </div>
-    </section>
-
-    <div id="status">Memuat data…</div>
-  </div>
-
-  <div id="hint-badge">
-    Gunakan <b>3D / 2D</b> untuk mengubah tampilan, slider untuk siang–malam,
-    dan mode <b>Panjang</b> / <b>Luas</b> untuk mengukur di sekitar bangunan Terban.
-  </div>
-
-  <div id="cesiumContainer"></div>
-
-  <script>
-    // ===== 1. Token & Asset ID =====
-    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0YjQ4NTk0NS0wZmE5LTQ3ZWEtOTEzYy0xZTZhN2E4NmU5MTgiLCJpZCI6MjEzNjk3LCJpYXQiOjE3NjU4NzQxMzd9.rWDk_DtxtgruoJjwcQovfDqYAAUoBPUI531Bm7LvH8U'; // GANTI di sini
-
-    const ASSET_ID_3D = 4224210;   // ganti dengan asset 3D Anda
-    const ASSET_ID_2D = 4224206;   // ganti dengan asset 2D Anda
-
-    // ===== 2. Viewer (dengan base map non-satelit) =====
-    const viewer = new Cesium.Viewer('cesiumContainer', {
-      terrain: Cesium.Terrain.fromWorldTerrain(),
-      animation: true,
-      timeline: true,
-      sceneMode: Cesium.SceneMode.SCENE3D,
-      geocoder: false,
-      homeButton: true,
-      sceneModePicker: true,
-      baseLayerPicker: false,     // kita ubah base map sendiri
-      navigationHelpButton: false,
-      fullscreenButton: true
-    });
-
-    // Ganti base map: gunakan world imagery gaya ROAD (bukan citra satelit)
-    (async () => {
-      viewer.imageryLayers.removeAll();
-      const roadImagery = await Cesium.createWorldImageryAsync({
-        style: Cesium.IonWorldImageryStyle.ROAD
-      });
-      viewer.imageryLayers.addImageryProvider(roadImagery);
-    })();
-
-    viewer.scene.globe.enableLighting = true;
-    viewer.shadows = true;
-    viewer.clock.shouldAnimate = false;
-
-    const statusEl = document.getElementById('status');
-    const modeLabelEl = document.getElementById('mode-label');
-    const btn3d = document.getElementById('btn3d');
-    const btn2d = document.getElementById('btn2d');
-    const timeSlider = document.getElementById('timeSlider');
-    const timeDisplay = document.getElementById('time-display');
-    const btnPlayTime = document.getElementById('btnPlayTime');
-    const btnPauseTime = document.getElementById('btnPauseTime');
-
-    const btnMeasureDistance = document.getElementById('btnMeasureDistance');
-    const btnMeasureArea = document.getElementById('btnMeasureArea');
-    const btnMeasureClear = document.getElementById('btnMeasureClear');
-    const btnZoomToData = document.getElementById('btnZoomToData');
-    const measureLabelEl = document.getElementById('measure-label');
-    const measureInfoEl = document.getElementById('measure-info');
-
-    function setModeButton(active) {
-      if (active === '3d') {
-        btn3d.classList.add('active');
-        btn2d.classList.remove('active');
-        modeLabelEl.textContent = '3D';
-      } else {
-        btn2d.classList.add('active');
-        btn3d.classList.remove('active');
-        modeLabelEl.textContent = '2D';
-      }
-    }
-
-    // ===== 3. Muat data & zoom default ke Terban =====
-    let tileset3D = null;
-    let dataSource2D = null;
-
-    let tileset3D = null;
-let dataSource2D = null;
-
-async function loadData() {
-  // 1) MUAT 3D TILES DULU
-  try {
-    statusEl.textContent = 'Memuat 3D Tiles…';
-    tileset3D = await Cesium.Cesium3DTileset.fromIonAssetId(ASSET_ID_3D);
-    viewer.scene.primitives.add(tileset3D);
-
-    // === LANGSUNG ZOOM KE AREA DATA SAAT PERTAMA KALI BUKA ===
-    const bs = tileset3D.boundingSphere;
-
-    // view awal (tanpa animasi panjang)
-    viewer.camera.flyToBoundingSphere(bs, {
-      duration: 0.0,
-      offset: new Cesium.HeadingPitchRange(
-        Cesium.Math.toRadians(-35.0),  // heading
-        Cesium.Math.toRadians(-40.0),  // pitch miring
-        bs.radius * 2.5                // jarak kamera
-      )
-    });
-
-    // tombol Home juga kembali ke area ini
-    viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (e) {
-      e.cancel = true;
-      viewer.camera.flyToBoundingSphere(bs, {
-        duration: 1.2,
-        offset: new Cesium.HeadingPitchRange(
-          Cesium.Math.toRadians(-35.0),
-          Cesium.Math.toRadians(-40.0),
-          bs.radius * 2.5
-        )
-      });
-    });
-
-    statusEl.textContent = '3D Tiles ter-load. Memuat data 2D…';
-  } catch (err) {
-    console.error('Gagal memuat 3D Tiles:', err);
-    statusEl.textContent = 'Gagal memuat 3D Tiles. Cek Asset ID 3D dan token.';
-    return; // tanpa 3D, tidak usah lanjut
-  }
-
-  // 2) MUAT DATA 2D (JIKA ADA) – TAPI JANGAN GANGGU 3D
-  try {
-    dataSource2D = await Cesium.GeoJsonDataSource.fromIonAssetId(ASSET_ID_2D);
-    viewer.dataSources.add(dataSource2D);
-
-    const entities = dataSource2D.entities.values;
-    for (let i = 0; i < entities.length; i++) {
-      const e = entities[i];
-      if (e.polygon) {
-        e.polygon.material = Cesium.Color.fromCssColorString('#60a5fa').withAlpha(0.55);
-        e.polygon.outline = true;
-        e.polygon.outlineColor = Cesium.Color.fromCssColorString('#1d4ed8');
-      }
-      if (e.polyline) {
-        e.polyline.width = 2.0;
-        e.polyline.material = Cesium.Color.fromCssColorString('#2563eb');
-      }
-      if (e.point) {
-        e.point.pixelSize = 7;
-        e.point.color = Cesium.Color.fromCssColorString('#f97316');
-        e.point.outlineColor = Cesium.Color.WHITE;
-        e.point.outlineWidth = 1;
-      }
-    }
-
-    statusEl.textContent = 'Data 3D & 2D siap. Silakan eksplor peta.';
-  } catch (err) {
-    console.warn('3D berhasil, tapi gagal memuat data 2D:', err);
-    statusEl.textContent = '3D siap. Data 2D tidak berhasil dimuat (cek Asset ID 2D).';
-  }
-}
-
-
-
-    // Tombol zoom manual
-    btnZoomToData.addEventListener('click', function () {
-      if (tileset3D) {
-        const bs = tileset3D.boundingSphere;
-        viewer.camera.flyToBoundingSphere(bs, {
-          duration: 1.0,
-          offset: new Cesium.HeadingPitchRange(
-            Cesium.Math.toRadians(-35.0),
-            Cesium.Math.toRadians(-40.0),
-            bs.radius * 2.5
-          )
+    <script>
+        // Inisialisasi Cesium Viewer
+        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJmYjU1ODcyMy1iMzEyLTRlMzAtODllNy1hYjc4MjE0N2YxNzQiLCJpZCI6MjA5NDA3LCJpYXQiOjE3MTI1OTI1ODJ9.5_1HjW6WjYxJD3sI1qFqLkPQD-vY6JRlO5N-G5JjL0k';
+        
+        const viewer = new Cesium.Viewer('cesiumViewer', {
+            terrainProvider: Cesium.createWorldTerrain(),
+            animation: false,
+            timeline: false,
+            sceneModePicker: true,
+            baseLayerPicker: true,
+            geocoder: true,
+            homeButton: true,
+            navigationHelpButton: true,
+            fullscreenButton: true,
+            infoBox: false,
+            selectionIndicator: true,
+            shadows: true,
+            shouldAnimate: true
         });
-      } else if (dataSource2D) {
-        viewer.flyTo(dataSource2D);
-      }
-    });
-
-    // ===== 4. 2D / 3D =====
-    btn3d.addEventListener('click', function () {
-      viewer.scene.morphTo3D(1.0);
-      setModeButton('3d');
-    });
-
-    btn2d.addEventListener('click', function () {
-      viewer.scene.morphTo2D(1.0);
-      setModeButton('2d');
-    });
-
-    // ===== 5. Waktu siang–malam =====
-    function updateTimeFromSlider() {
-      const hour = parseInt(timeSlider.value, 10);
-      const now = Cesium.JulianDate.now();
-      const gregorian = Cesium.JulianDate.toDate(now);
-      gregorian.setUTCHours(hour, 0, 0, 0);
-      const newTime = Cesium.JulianDate.fromDate(gregorian);
-      viewer.clock.currentTime = newTime;
-      viewer.clock.shouldAnimate = false;
-
-      const hourStr = hour.toString().padStart(2, '0');
-      timeDisplay.textContent = `Jam ${hourStr}:00 UTC`;
-    }
-
-    timeSlider.addEventListener('input', updateTimeFromSlider);
-    updateTimeFromSlider();
-
-    btnPlayTime.addEventListener('click', function () {
-      viewer.clock.shouldAnimate = true;
-      viewer.clock.multiplier = 4000;
-      statusEl.textContent = 'Animasi waktu berjalan.';
-    });
-
-    btnPauseTime.addEventListener('click', function () {
-      viewer.clock.shouldAnimate = false;
-      statusEl.textContent = 'Animasi waktu dihentikan. Anda dapat geser slider jam.';
-    });
-
-    // ===== 6. Alat ukur jarak & luas =====
-    let measureMode = null;
-    let measurePositions = [];
-    let measureShapeEntity = null;
-    let measureLabelEntity = null;
-    let measurePointEntities = [];
-
-    function setMeasureMode(mode) {
-      measureMode = mode;
-      if (mode === 'distance') {
-        measureLabelEl.textContent = 'Panjang';
-        btnMeasureDistance.classList.add('active');
-        btnMeasureArea.classList.remove('active');
-        measureInfoEl.textContent = 'Mode panjang: klik di peta untuk membuat garis, klik kanan untuk selesai.';
-      } else if (mode === 'area') {
-        measureLabelEl.textContent = 'Luas';
-        btnMeasureArea.classList.add('active');
-        btnMeasureDistance.classList.remove('active');
-        measureInfoEl.textContent = 'Mode luas: klik di peta untuk membuat poligon, klik kanan untuk selesai.';
-      } else {
-        measureLabelEl.textContent = 'Off';
-        btnMeasureArea.classList.remove('active');
-        btnMeasureDistance.classList.remove('active');
-        measureInfoEl.textContent = 'Pilih mode, lalu klik di peta untuk menambah titik. Klik kanan untuk selesai.';
-      }
-    }
-
-    function clearMeasurement() {
-      measurePositions = [];
-      if (measureShapeEntity) {
-        viewer.entities.remove(measureShapeEntity);
-        measureShapeEntity = null;
-      }
-      if (measureLabelEntity) {
-        viewer.entities.remove(measureLabelEntity);
-        measureLabelEntity = null;
-      }
-      for (const p of measurePointEntities) {
-        viewer.entities.remove(p);
-      }
-      measurePointEntities = [];
-      measureInfoEl.textContent = 'Pengukuran dibersihkan. Pilih mode untuk mulai lagi.';
-    }
-
-    btnMeasureDistance.addEventListener('click', function () {
-      clearMeasurement();
-      setMeasureMode('distance');
-    });
-
-    btnMeasureArea.addEventListener('click', function () {
-      clearMeasurement();
-      setMeasureMode('area');
-    });
-
-    btnMeasureClear.addEventListener('click', function () {
-      clearMeasurement();
-      setMeasureMode(null);
-    });
-
-    const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
-
-    handler.setInputAction(function (click) {
-      if (!measureMode) return;
-
-      let cartesian = viewer.scene.pickPosition(click.position);
-      if (!Cesium.defined(cartesian)) {
-        cartesian = viewer.camera.pickEllipsoid(
-          click.position,
-          viewer.scene.globe.ellipsoid
-        );
-      }
-      if (!cartesian) return;
-
-      measurePositions.push(cartesian);
-
-      const point = viewer.entities.add({
-        position: cartesian,
-        point: {
-          pixelSize: 7,
-          color: Cesium.Color.LIME,
-          outlineColor: Cesium.Color.BLACK,
-          outlineWidth: 1
-        }
-      });
-      measurePointEntities.push(point);
-
-      updateMeasurement();
-    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-
-    handler.setInputAction(function () {
-      if (!measureMode) return;
-      measureInfoEl.textContent += '  (Pengukuran selesai, gunakan Clear untuk menghapus.)';
-      measureMode = null;
-      measureLabelEl.textContent = 'Off';
-      btnMeasureArea.classList.remove('active');
-      btnMeasureDistance.classList.remove('active');
-    }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
-
-    function updateMeasurement() {
-      if (measureMode === 'distance' && measurePositions.length >= 2) {
-        if (!measureShapeEntity) {
-          measureShapeEntity = viewer.entities.add({
-            polyline: {
-              positions: measurePositions,
-              width: 3,
-              material: Cesium.Color.LIME
+        
+        // Inisialisasi variabel
+        let h3GridEntities = [];
+        let currentAssetId = null;
+        let currentOgcLayer = null;
+        
+        // Elemen DOM
+        const assetIdInput = document.getElementById('assetId');
+        const loadAssetBtn = document.getElementById('loadAssetBtn');
+        const h3ResolutionSelect = document.getElementById('h3Resolution');
+        const generateGridBtn = document.getElementById('generateGridBtn');
+        const clearGridBtn = document.getElementById('clearGridBtn');
+        const ogcServerUrlInput = document.getElementById('ogcServerUrl');
+        const ogcLayerInput = document.getElementById('ogcLayer');
+        const loadOGCBtn = document.getElementById('loadOGCBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const activeAssetIdElement = document.getElementById('activeAssetId');
+        const h3CellCountElement = document.getElementById('h3CellCount');
+        const activeOGCLayerElement = document.getElementById('activeOGCLayer');
+        
+        // Fungsi untuk memperbarui status
+        function updateStatus(message, type = 'info') {
+            statusMessage.textContent = message;
+            
+            if (type === 'error') {
+                statusMessage.style.color = '#FF6B6B';
+            } else if (type === 'success') {
+                statusMessage.style.color = '#4ECDC4';
+            } else {
+                statusMessage.style.color = '#e0e1dd';
             }
-          });
+            
+            console.log(`Status: ${message}`);
         }
-
-        const ellipsoid = Cesium.Ellipsoid.WGS84;
-        let total = 0.0;
-        for (let i = 1; i < measurePositions.length; i++) {
-          const c1 = ellipsoid.cartesianToCartographic(measurePositions[i - 1]);
-          const c2 = ellipsoid.cartesianToCartographic(measurePositions[i]);
-          const geodesic = new Cesium.EllipsoidGeodesic(c1, c2);
-          total += geodesic.surfaceDistance;
-        }
-
-        const lastPos = measurePositions[measurePositions.length - 1];
-
-        const km = total / 1000.0;
-        const text = km >= 1
-          ? `Panjang: ${km.toFixed(3)} km`
-          : `Panjang: ${total.toFixed(1)} m`;
-
-        if (!measureLabelEntity) {
-          measureLabelEntity = viewer.entities.add({
-            position: lastPos,
-            label: {
-              text: text,
-              font: '14px sans-serif',
-              fillColor: Cesium.Color.WHITE,
-              outlineColor: Cesium.Color.BLACK,
-              outlineWidth: 2,
-              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-              verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-              pixelOffset: new Cesium.Cartesian2(0, -10)
+        
+        // Fungsi untuk memuat asset dari Cesium Ion
+        async function loadCesiumAsset(assetId) {
+            try {
+                loadingIndicator.classList.add('active');
+                updateStatus(`Memuat asset ID ${assetId} dari Cesium Ion...`);
+                
+                // Hapus asset sebelumnya jika ada
+                if (currentAssetId) {
+                    viewer.dataSources.removeAll();
+                }
+                
+                // Load asset dari Cesium Ion
+                const asset = await Cesium.IonResource.fromAssetId(parseInt(assetId));
+                
+                // Tampilkan sebagai imagery layer
+                const layer = viewer.imageryLayers.addImageryProvider(
+                    new Cesium.IonImageryProvider({ assetId: parseInt(assetId) })
+                );
+                
+                currentAssetId = assetId;
+                activeAssetIdElement.textContent = assetId;
+                
+                updateStatus(`Asset ID ${assetId} berhasil dimuat.`, 'success');
+                loadingIndicator.classList.remove('active');
+                
+                return layer;
+            } catch (error) {
+                console.error('Error loading Cesium asset:', error);
+                updateStatus(`Gagal memuat asset ID ${assetId}: ${error.message}`, 'error');
+                loadingIndicator.classList.remove('active');
+                return null;
             }
-          });
-        } else {
-          measureLabelEntity.position = lastPos;
-          measureLabelEntity.label.text = text;
         }
-
-        measureInfoEl.textContent = text;
-      }
-
-      if (measureMode === 'area' && measurePositions.length >= 3) {
-        if (!measureShapeEntity) {
-          measureShapeEntity = viewer.entities.add({
-            polygon: {
-              hierarchy: new Cesium.CallbackProperty(function () {
-                return new Cesium.PolygonHierarchy(measurePositions);
-              }, false),
-              material: Cesium.Color.LIME.withAlpha(0.3),
-              outline: true,
-              outlineColor: Cesium.Color.LIME
+        
+        // Fungsi untuk menghasilkan grid H3
+        function generateH3Grid() {
+            try {
+                // Hapus grid sebelumnya
+                clearH3Grid();
+                
+                const resolution = parseInt(h3ResolutionSelect.value);
+                updateStatus(`Membuat grid H3 dengan resolusi ${resolution}...`);
+                
+                // Dapatkan batas viewport saat ini
+                const bounds = getViewportBounds();
+                if (!bounds) {
+                    updateStatus('Tidak dapat mendapatkan batas viewport. Pastikan globe sudah terlihat.', 'error');
+                    return;
+                }
+                
+                // Konversi bounds ke koordinat
+                const north = bounds.north;
+                const south = bounds.south;
+                const east = bounds.east;
+                const west = bounds.west;
+                
+                // Buat polygon bounding box
+                const bboxPolygon = [
+                    [west, north],
+                    [east, north],
+                    [east, south],
+                    [west, south],
+                    [west, north]
+                ];
+                
+                // Dapatkan sel H3 yang menutupi bbox
+                const hexagons = h3.polygonToCells(bboxPolygon, resolution);
+                
+                // Untuk setiap hexagon, buat entity di Cesium
+                hexagons.forEach(hexId => {
+                    // Dapatkan batas hexagon
+                    const hexBoundary = h3.cellToBoundary(hexId);
+                    
+                    // Konversi ke format Cesium
+                    const positions = hexBoundary.map(coord => 
+                        Cesium.Cartesian3.fromDegrees(coord[1], coord[0])
+                    );
+                    
+                    // Tambahkan entity untuk hexagon
+                    const entity = viewer.entities.add({
+                        polygon: {
+                            hierarchy: new Cesium.PolygonHierarchy(positions),
+                            material: Cesium.Color.fromBytes(78, 205, 196, 100),
+                            outline: true,
+                            outlineColor: Cesium.Color.fromBytes(78, 205, 196, 200),
+                            height: 0,
+                            extrudedHeight: 100 * Math.random(), // Tinggi acak untuk visualisasi 3D
+                            closeTop: true,
+                            closeBottom: true
+                        },
+                        label: {
+                            text: hexId.substring(0, 6),
+                            font: '12px Arial',
+                            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                            outlineWidth: 2,
+                            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+                            pixelOffset: new Cesium.Cartesian2(0, 0),
+                            show: resolution <= 5 // Tampilkan label hanya untuk resolusi rendah
+                        }
+                    });
+                    
+                    h3GridEntities.push(entity);
+                });
+                
+                h3CellCountElement.textContent = hexagons.length;
+                updateStatus(`Grid H3 berhasil dibuat dengan ${hexagons.length} sel hexagon.`, 'success');
+                
+            } catch (error) {
+                console.error('Error generating H3 grid:', error);
+                updateStatus(`Gagal membuat grid H3: ${error.message}`, 'error');
             }
-          });
         }
-
-        const R = 6378137.0;
-        const cartos = measurePositions.map(p => Cesium.Cartographic.fromCartesian(p));
-        const lat0 = cartos[0].latitude;
-        const cosLat0 = Math.cos(lat0);
-
-        const xy = cartos.map(c => {
-          const x = R * c.longitude * cosLat0;
-          const y = R * c.latitude * R / R;
-          return { x, y };
+        
+        // Fungsi untuk mendapatkan batas viewport
+        function getViewportBounds() {
+            try {
+                const canvas = viewer.scene.canvas;
+                const width = canvas.width;
+                const height = canvas.height;
+                
+                // Dapatkan koordinat dari pojok kiri atas dan kanan bawah
+                const upperLeft = viewer.scene.camera.pickEllipsoid(new Cesium.Cartesian2(0, 0));
+                const lowerRight = viewer.scene.camera.pickEllipsoid(new Cesium.Cartesian2(width, height));
+                
+                if (!upperLeft || !lowerRight) {
+                    return null;
+                }
+                
+                // Konversi ke derajat
+                const upperLeftCartographic = Cesium.Cartographic.fromCartesian(upperLeft);
+                const lowerRightCartographic = Cesium.Cartographic.fromCartesian(lowerRight);
+                
+                const west = Cesium.Math.toDegrees(upperLeftCartographic.longitude);
+                const north = Cesium.Math.toDegrees(upperLeftCartographic.latitude);
+                const east = Cesium.Math.toDegrees(lowerRightCartographic.longitude);
+                const south = Cesium.Math.toDegrees(lowerRightCartographic.latitude);
+                
+                return { north, south, east, west };
+            } catch (error) {
+                console.error('Error getting viewport bounds:', error);
+                return null;
+            }
+        }
+        
+        // Fungsi untuk menghapus grid H3
+        function clearH3Grid() {
+            h3GridEntities.forEach(entity => {
+                viewer.entities.remove(entity);
+            });
+            h3GridEntities = [];
+            h3CellCountElement.textContent = '0';
+            updateStatus('Grid H3 telah dihapus.');
+        }
+        
+        // Fungsi untuk memuat layer OGC
+        function loadOGCLayer() {
+            try {
+                const serverUrl = ogcServerUrlInput.value.trim();
+                const layerName = ogcLayerInput.value.trim();
+                
+                if (!serverUrl || !layerName) {
+                    updateStatus('Harap masukkan URL server OGC dan nama layer.', 'error');
+                    return;
+                }
+                
+                updateStatus(`Memuat layer OGC: ${layerName}...`);
+                
+                // Hapus layer OGC sebelumnya jika ada
+                if (currentOgcLayer) {
+                    viewer.imageryLayers.remove(currentOgcLayer);
+                }
+                
+                // Coba sebagai WMS layer
+                const wmsProvider = new Cesium.WebMapServiceImageryProvider({
+                    url: serverUrl,
+                    layers: layerName,
+                    parameters: {
+                        transparent: true,
+                        format: 'image/png'
+                    }
+                });
+                
+                const layer = viewer.imageryLayers.addImageryProvider(wmsProvider);
+                currentOgcLayer = layer;
+                activeOGCLayerElement.textContent = layerName;
+                
+                updateStatus(`Layer OGC ${layerName} berhasil dimuat.`, 'success');
+                
+            } catch (error) {
+                console.error('Error loading OGC layer:', error);
+                updateStatus(`Gagal memuat layer OGC: ${error.message}`, 'error');
+                
+                // Coba alternatif: tampilkan placeholder untuk demo
+                if (ogcServerUrlInput.value.includes('example.com')) {
+                    activeOGCLayerElement.textContent = 'Layer Demo OGC';
+                    updateStatus('Menggunakan layer demo OGC untuk contoh.', 'info');
+                }
+            }
+        }
+        
+        // Event Listeners
+        loadAssetBtn.addEventListener('click', () => {
+            const assetId = assetIdInput.value.trim();
+            if (assetId) {
+                loadCesiumAsset(assetId);
+            } else {
+                updateStatus('Harap masukkan Asset ID Cesium Ion.', 'error');
+            }
         });
-
-        let area = 0.0;
-        for (let i = 0; i < xy.length; i++) {
-          const j = (i + 1) % xy.length;
-          area += xy[i].x * xy[j].y - xy[j].x * xy[i].y;
-        }
-        area = Math.abs(area) * 0.5;
-
-        const ha = area / 10000.0;
-        const km2 = area / 1e6;
-        let text;
-        if (km2 >= 1) {
-          text = `Luas: ${km2.toFixed(3)} km²`;
-        } else if (ha >= 1) {
-          text = `Luas: ${ha.toFixed(2)} ha`;
-        } else {
-          text = `Luas: ${area.toFixed(1)} m²`;
-        }
-
-        let sumX = 0, sumY = 0, sumZ = 0;
-        for (const p of measurePositions) {
-          sumX += p.x; sumY += p.y; sumZ += p.z;
-        }
-        const center = new Cesium.Cartesian3(
-          sumX / measurePositions.length,
-          sumY / measurePositions.length,
-          sumZ / measurePositions.length
-        );
-
-        if (!measureLabelEntity) {
-          measureLabelEntity = viewer.entities.add({
-            position: center,
-            label: {
-              text: text,
-              font: '14px sans-serif',
-              fillColor: Cesium.Color.WHITE,
-              outlineColor: Cesium.Color.BLACK,
-              outlineWidth: 2,
-              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-              verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-              pixelOffset: new Cesium.Cartesian2(0, -10)
+        
+        generateGridBtn.addEventListener('click', generateH3Grid);
+        clearGridBtn.addEventListener('click', clearH3Grid);
+        loadOGCBtn.addEventListener('click', loadOGCLayer);
+        
+        // Event listener untuk Enter key pada input
+        assetIdInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loadAssetBtn.click();
             }
-          });
-        } else {
-          measureLabelEntity.position = center;
-          measureLabelEntity.label.text = text;
-        }
-
-        measureInfoEl.textContent = text;
-      }
-    }
-  </script>
+        });
+        
+        ogcServerUrlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loadOGCBtn.click();
+            }
+        });
+        
+        ogcLayerInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loadOGCBtn.click();
+            }
+        });
+        
+        // Load default asset saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStatus('Menginisialisasi Cesium Viewer...');
+            
+            // Zoom ke wilayah Indonesia
+            viewer.camera.setView({
+                destination: Cesium.Cartesian3.fromDegrees(117.0, -2.0, 5000000),
+                orientation: {
+                    heading: Cesium.Math.toRadians(0),
+                    pitch: Cesium.Math.toRadians(-90),
+                    roll: 0.0
+                }
+            });
+            
+            // Load default Cesium Ion asset (Bing Maps)
+            setTimeout(() => {
+                loadCesiumAsset('1');
+            }, 1000);
+            
+            // Set contoh URL OGC untuk demo
+            ogcServerUrlInput.value = 'https://demo.geo-solutions.it/geoserver/wms';
+            ogcLayerInput.value = 'topp:states';
+            
+            updateStatus('Sistem siap. Masukkan Asset ID Cesium Ion untuk memulai.');
+        });
+        
+        // Fungsi untuk demo interaktif: tampilkan info saat mengklik entity
+        viewer.screenSpaceEventHandler.setInputAction((movement) => {
+            const pickedObject = viewer.scene.pick(movement.position);
+            if (Cesium.defined(pickedObject) && pickedObject.id) {
+                const entity = pickedObject.id;
+                
+                // Jika entity adalah bagian dari grid H3
+                if (h3GridEntities.includes(entity)) {
+                    const hexId = entity.label ? entity.label.text._value : 'Unknown H3 Cell';
+                    updateStatus(`Sel H3: ${hexId} | Tinggi: ${entity.polygon.extrudedHeight._value.toFixed(1)}m`);
+                }
+            }
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    </script>
 </body>
 </html>
-
-
