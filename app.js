@@ -1,3 +1,4 @@
+
 /* ===========================
    Konfigurasi wajib (ISI INI)
    =========================== */
@@ -8,6 +9,70 @@ const ION_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0YjQ4N
 // - 2D Buildings: GeoJSON/TopoJSON (GeoJsonDataSource) atau 3D Tiles juga (jika 2D anda sebenarnya tiles)
 const ION_ASSET_ID_BUILDINGS_3D = 4224210; // <-- ganti: contoh 123456
 const ION_ASSET_ID_BUILDINGS_2D = 4224206; // <-- ganti: contoh 234567
+
+/* ===========================
+   Inisialisasi Cesium Viewer
+   =========================== */
+Cesium.Ion.defaultAccessToken = ION_ACCESS_TOKEN;
+
+const statusEl = document.getElementById("status");
+const setStatus = (msg) => { statusEl.textContent = msg; };
+
+let viewer; // deklarasi global agar fungsi lain bisa mengakses
+
+async function initViewer() {
+  // Buat viewer terlebih dahulu menggunakan Ellipsoid (tanpa terrain)
+  viewer = new Cesium.Viewer("cesiumContainer", {
+    animation: false,
+    timeline: false,
+    geocoder: true,
+    homeButton: true,
+    sceneModePicker: true,
+    navigationHelpButton: false,
+    baseLayerPicker: false,
+    selectionIndicator: true,
+    infoBox: true,
+    imageryProvider: new Cesium.OpenStreetMapImageryProvider({
+      url: "https://tile.openstreetmap.org/"
+    }),
+    terrainProvider: new Cesium.EllipsoidTerrainProvider()
+  });
+
+  // Coba aktifkan terrain Cesium World Terrain (async)
+  try {
+    viewer.terrainProvider = await Cesium.createWorldTerrainAsync();
+    setStatus("World Terrain berhasil dimuat dari Cesium ion.");
+  } catch (err) {
+    console.warn("Gagal memuat World Terrain, tetap pakai ellipsoid:", err);
+    setStatus("World Terrain gagal dimuat, menggunakan terrain ellipsoid default.");
+  }
+
+  // Pengaturan pencahayaan dan bayangan
+  viewer.scene.globe.enableLighting = true;
+  viewer.shadows = true;
+  viewer.scene.shadowMap.enabled = true;
+
+  // Nonaktifkan double-click zoom agar nyaman untuk digitasi
+  viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(
+    Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK
+  );
+
+  // Fly ke area Terban
+  viewer.camera.flyTo({
+    destination: Cesium.Cartesian3.fromDegrees(
+      TERBAN_CENTER.lon,
+      TERBAN_CENTER.lat,
+      TERBAN_CENTER.height
+    )
+  });
+
+  // Setelah viewer siap, load data ion
+  loadIonLayers();
+}
+
+// Jalankan fungsi inisialisasi viewer
+initViewer();
+
 
 // Pusat Terban (zoom awal)
 const TERBAN_CENTER = {
