@@ -1,17 +1,30 @@
 <!doctype html>
-f<!doctype html>
 <html lang="id">
 <head>
   <meta charset="utf-8" />
-@@ -26,22 +26,15 @@
-      </label>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Terban | Web Map Interaktif (OSM + Cesium ion)</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.116.0/Build/Cesium/Widgets/widgets.css">
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <div id="toolbar">
+    <div class="row">
+      <div class="title">Terban | Web Map Interaktif</div>
     </div>
 
     <div class="row">
-      <button id="btnDay" type="button">Basemap Siang (OSM)</button>
-      <button id="btnNight" type="button">Basemap Malam</button>
+      <label class="switch">
+        <input id="toggle3d" type="checkbox" checked />
+        <span>Buildings 3D (ion)</span>
+      </label>
+      <label class="switch">
+        <input id="toggle2d" type="checkbox" checked />
+        <span>Buildings 2D (ion)</span>
+      </label>
     </div>
-
 
     <div class="row">
       <button id="btnMeasureLine" type="button">Ukur Panjang</button>
@@ -24,11 +37,40 @@ f<!doctype html>
       <button id="btnSunDir" type="button">Arah Sinar Matahari (klik 1 titik)</button>
     </div>
 
- 
     <hr class="sep" />
 
     <div class="row">
-@@ -75,3 +68,4 @@
+      <div class="subtitle">Tambah OGC API - Features</div>
+    </div>
+
+    <div class="row">
+      <input id="ogcBaseUrl" type="text" placeholder="Base URL (contoh: https://server/ogcapi)" />
+      <button id="btnLoadCollections" type="button">Load</button>
+    </div>
+
+    <div class="row">
+      <select id="ogcCollections"></select>
+      <button id="btnAddOgcLayer" type="button">Add Layer</button>
+    </div>
+
+    <div id="status">Loading...</div>
+    <div class="hint">
+      Catatan: OGC API harus mengizinkan CORS. Untuk data besar, gunakan bbox/limit.
+    </div>
+  </div>
+
+  <div id="cesiumContainer"></div>
+
+  <script>
+    // agar assets/worker Cesium dari CDN aman
+    window.CESIUM_BASE_URL = "https://cdn.jsdelivr.net/npm/cesium@1.116.0/Build/Cesium/";
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/cesium@1.116.0/Build/Cesium/Cesium.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.min.js"></script>
+
+  <!-- cache-buster: ganti angka jika perlu -->
+  <script src="./app.js?v=20251223_2"></script>
 </body>
 </html>
-
