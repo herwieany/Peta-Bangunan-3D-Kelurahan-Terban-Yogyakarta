@@ -87,27 +87,6 @@ const NIGHT_TILE_URL = "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png";
 /* ===========================
    Inisialisasi Cesium Viewer
    =========================== */
-Cesium.Ion.defaultAccessToken = ION_ACCESS_TOKEN;
-
-const statusEl = document.getElementById("status");
-const setStatus = (msg) => { statusEl.textContent = msg; };
-
-const viewer = new Cesium.Viewer("cesiumContainer", {
-  animation: false,
-  timeline: false,
-  geocoder: true,
-  homeButton: true,
-  sceneModePicker: true,
-  navigationHelpButton: false,
-  baseLayerPicker: false,
-  selectionIndicator: true,
-  infoBox: true,
-  // Basemap siang: OpenStreetMap
-  imageryProvider: new Cesium.OpenStreetMapImageryProvider({
-    url: "https://tile.openstreetmap.org/"
-  }),
-  terrainProvider: Cesium.createWorldTerrain()
-});
 
 viewer.scene.globe.enableLighting = true;
 viewer.shadows = true;
