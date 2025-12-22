@@ -13,7 +13,6 @@ const TERBAN_CENTER = {
   height: 1500
 };
 
-const NIGHT_TILE_URL = "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png";
 
 /* ===========================
    Global refs
@@ -24,8 +23,6 @@ const statusEl = document.getElementById("status");
 const setStatus = (msg) => { statusEl.textContent = msg; };
 
 let viewer;
-let dayLayer;
-let nightLayer = null;
 
 let tileset3D = null;
 let buildings2D = null;
@@ -68,7 +65,6 @@ async function init() {
   }
 
   // 3) Setup scene
-  dayLayer = viewer.imageryLayers.get(0);
   viewer.scene.globe.enableLighting = true;
   viewer.shadows = true;
   viewer.scene.shadowMap.enabled = true;
@@ -85,8 +81,6 @@ async function init() {
   });
 
   // 5) Hook UI setelah viewer siap
-  document.getElementById("btnDay").addEventListener("click", setDayBasemap);
-  document.getElementById("btnNight").addEventListener("click", setNightBasemap);
 
   document.getElementById("toggle3d").addEventListener("change", (e) => {
     if (tileset3D) tileset3D.show = e.target.checked;
