@@ -1,68 +1,76 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="id">
 <head>
   <meta charset="utf-8" />
-  <title>Peta Bangunan Kelurahan Terban, Yogyakarta</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Terban Yogyakarta | 2D+3D Buildings (Cesium ion) + Measure + Sun + OGC API</title>
 
-  <!-- CSS Cesium -->
-  <link
-    rel="stylesheet"
-    href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css"
-  />
-
-  <!-- CSS kita sendiri -->
-  <link rel="stylesheet" href="css/style.css" />
-
-  <!-- CesiumJS -->
-  <script
-    src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js">
-  </script>
+  <!-- CesiumJS (global Cesium) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.116.0/Build/Cesium/Widgets/widgets.css">
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-  <!-- Header judul -->
-  <header id="app-header">
-    <h1>Peta Bangunan Kelurahan Terban, Yogyakarta</h1>
-  </header>
-
-  <!-- Bungkus peta -->
-  <main id="map-wrapper">
-    <div id="cesiumContainer"></div>
-
-    <!-- Panel kontrol sederhana -->
-    <div id="toolbar">
-      <div class="section">
-        <div class="label-row">
-          <span>Mode Tampilan</span>
-          <span id="mode-label">3D</span>
-        </div>
-        <div class="btn-row">
-          <button id="btn3d" class="btn btn-active">3D</button>
-          <button id="btn2d" class="btn">2D</button>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="label-row">
-          <span>Navigasi</span>
-        </div>
-        <div class="btn-row">
-          <button id="btnZoomData" class="btn">Zoom ke Data</button>
-          <button id="btnHome" class="btn">Home Globe</button>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="label-row">
-          <span>Status</span>
-        </div>
-        <div id="status">Menunggu inisialisasi…</div>
-      </div>
+  <div id="toolbar">
+    <div class="row">
+      <div class="title">Terban | Web Map Interaktif</div>
     </div>
-  </main>
 
-  <!-- Script utama kita -->
-  <script src="js/app.js"></script>
+    <div class="row">
+      <label class="switch">
+        <input id="toggle3d" type="checkbox" checked />
+        <span>Buildings 3D (ion)</span>
+      </label>
+      <label class="switch">
+        <input id="toggle2d" type="checkbox" checked />
+        <span>Buildings 2D (ion)</span>
+      </label>
+    </div>
+
+    <div class="row">
+      <button id="btnDay" type="button">Basemap Siang (OSM)</button>
+      <button id="btnNight" type="button">Basemap Malam</button>
+    </div>
+
+    <div class="row">
+      <button id="btnMeasureLine" type="button">Ukur Panjang</button>
+      <button id="btnMeasureArea" type="button">Ukur Luas</button>
+      <button id="btnClear" type="button">Clear</button>
+    </div>
+
+    <div class="row">
+      <button id="btnNoon" type="button">Set Jam 12:00 WIB</button>
+      <button id="btnSunDir" type="button">Arah Sinar Matahari (klik 1 titik)</button>
+    </div>
+
+    <hr class="sep" />
+
+    <div class="row">
+      <div class="subtitle">Tambah OGC API - Features</div>
+    </div>
+
+    <div class="row">
+      <input id="ogcBaseUrl" type="text" placeholder="Base URL (contoh: https://server/ogcapi)" />
+      <button id="btnLoadCollections" type="button">Load</button>
+    </div>
+
+    <div class="row">
+      <select id="ogcCollections"></select>
+      <button id="btnAddOgcLayer" type="button">Add Layer</button>
+    </div>
+
+    <div id="status"></div>
+    <div class="hint">
+      Catatan: endpoint OGC harus mengizinkan CORS. Untuk data besar, batasi dengan bbox/limit.
+    </div>
+  </div>
+
+  <div id="cesiumContainer"></div>
+
+  <!-- Dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/cesium@1.116.0/Build/Cesium/Cesium.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.min.js"></script>
+
+  <script src="./app.js"></script>
 </body>
 </html>
-
-
