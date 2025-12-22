@@ -2,13 +2,13 @@
 // Template WebGIS sederhana yang mengambil data dari Cesium ion
 
 // ===== 1. Konfigurasi token & Asset ID =====
-Cesium.Ion.defaultAccessToken = 'GANTI_DENGAN_TOKEN_ION_ANDA';
+Cesium.Ion.defaultAccessToken = 'yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwNTY2Y2Y1Ni02YWUyLTQ1OWQtODcyYi1lZGM5OTJhOWI1OWQiLCJpZCI6MjEzNjk3LCJpYXQiOjE3NjU4NjA2NzF9.37HTp-nTHxNr4umeQruV45iHJnaxmJsS94B_yUIdm28';
 
 // Ganti dengan Asset ID 3D Tiles (misalnya bangunan 3D Terban)
-const ASSET_ID_3D = 123456;   // contoh, ganti angka ini
+const ASSET_ID_3D = 4224210;   // contoh, ganti angka ini
 
 // (Opsional) Asset ID data vektor 2D (GeoJSON) dari Cesium ion
-const ASSET_ID_2D = 789012;   // kalau tidak ada, bisa dikosongkan atau diabaikan
+const ASSET_ID_2D = 4224206;   // kalau tidak ada, bisa dikosongkan atau diabaikan
 
 // ===== 2. Inisialisasi viewer =====
 const viewer = new Cesium.Viewer('cesiumContainer', {
