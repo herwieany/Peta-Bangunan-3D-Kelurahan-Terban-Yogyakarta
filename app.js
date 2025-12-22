@@ -426,4 +426,32 @@ async function loadOgcCollections() {
 }
 
 async function addOgcLayer() {
-  const base = normalizeBaseUrl(ogcBaseUrlEl.va
+  const base = normalizeBaseUrl(ogcBaseUrlEl.value);
+  const collectionId = ogcCollectionsEl.value;
+  if (!base || !collectionId) { setStatus("Base URL / Collection belum dipilih."); return; }
+
+  try {
+    const bbox = getCurrentViewBbox();
+    const limit = 1000;
+
+    const url = bbox
+      ? `${base}/collections/${encodeURIComponent(collectionId)}/items?f=geojson&limit=${limit}&bbox=${bbox.join(",")}`
+      : `${base}/collections/${encodeURIComponent(collectionId)}/items?f=geojson&limit=${limit}`;
+
+    setStatus(`Memuat OGC layer: ${collectionId} ...`);
+
+    const geojson = await fetch(url).then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    });
+
+    const ds = await Cesium.GeoJsonDataSource.load(geojson, { clampToGround: true });
+    viewer.dataSources.add(ds);
+    await viewer.zoomTo(ds);
+
+    setStatus(`OGC layer ditambahkan: ${collectionId}`);
+  } catch (err) {
+    console.error(err);
+    setStatus("Gagal menambahkan OGC layer (CORS/paging/format geojson).");
+  }
+}
