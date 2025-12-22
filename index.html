@@ -1,14 +1,14 @@
-f<!doctype html>
+<!doctype html>
 <html lang="id">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Terban Yogyakarta | 2D+3D Buildings (Cesium ion) + Measure + Sun + OGC API</title>
+  <title>Terban | Web Map Interaktif (OSM + Cesium ion)</title>
 
-  <!-- CesiumJS (global Cesium) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.116.0/Build/Cesium/Widgets/widgets.css">
   <link rel="stylesheet" href="./style.css" />
 </head>
+
 <body>
   <div id="toolbar">
     <div class="row">
@@ -26,15 +26,17 @@ f<!doctype html>
       </label>
     </div>
 
-
-
     <div class="row">
       <button id="btnMeasureLine" type="button">Ukur Panjang</button>
       <button id="btnMeasureArea" type="button">Ukur Luas</button>
       <button id="btnClear" type="button">Clear</button>
     </div>
 
- 
+    <div class="row">
+      <button id="btnNoon" type="button">Set Jam 12:00 WIB</button>
+      <button id="btnSunDir" type="button">Arah Sinar Matahari (klik 1 titik)</button>
+    </div>
+
     <hr class="sep" />
 
     <div class="row">
@@ -51,21 +53,24 @@ f<!doctype html>
       <button id="btnAddOgcLayer" type="button">Add Layer</button>
     </div>
 
-    <div id="status"></div>
+    <div id="status">Loading...</div>
     <div class="hint">
-      Catatan: endpoint OGC harus mengizinkan CORS. Untuk data besar, batasi dengan bbox/limit.
+      Catatan: OGC API harus mengizinkan CORS. Untuk data besar, gunakan bbox/limit.
     </div>
   </div>
 
   <div id="cesiumContainer"></div>
 
-  <!-- Dependencies -->
+  <script>
+    // agar assets/worker Cesium dari CDN aman
+    window.CESIUM_BASE_URL = "https://cdn.jsdelivr.net/npm/cesium@1.116.0/Build/Cesium/";
+  </script>
+
   <script src="https://cdn.jsdelivr.net/npm/cesium@1.116.0/Build/Cesium/Cesium.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.min.js"></script>
 
-<script src="./app.js?v=20251223_1"></script>
+  <!-- cache-buster: ganti angka jika perlu -->
+  <script src="./app.js?v=20251223_2"></script>
 </body>
 </html>
-
-
