@@ -1,403 +1,498 @@
-// Konfigurasi Aplikasi Cesium Ion Viewer
-document.addEventListener('DOMContentLoaded', function() {
-    // Default Cesium Ion Access Token (gunakan token Anda sendiri)
-    let cesiumAccessToken = '';
-    
-    // Inisialisasi variabel viewer
-    let viewer = null;
-    let is2DMode = false;
-    let currentLocation = 'jakarta';
-    
-    // Data lokasi dengan koordinat
-    const locations = {
-        jakarta: { lat: -6.2088, lon: 106.8456, alt: 1000, heading: 0, pitch: -30 },
-        bali: { lat: -8.4095, lon: 115.1889, alt: 5000, heading: 0, pitch: -30 },
-        yogyakarta: { lat: -7.7956, lon: 110.3695, alt: 2000, heading: 0, pitch: -30 },
-        surabaya: { lat: -7.2575, lon: 112.7521, alt: 1000, heading: 0, pitch: -30 },
-        newyork: { lat: 40.7128, lon: -74.0060, alt: 5000, heading: 0, pitch: -30 },
-        tokyo: { lat: 35.6762, lon: 139.6503, alt: 5000, heading: 0, pitch: -30 },
-        paris: { lat: 48.8566, lon: 2.3522, alt: 5000, heading: 0, pitch: -30 },
-        sydney: { lat: -33.8688, lon: 151.2093, alt: 5000, heading: 0, pitch: -30 }
-    };
-    
-    // Elemen DOM
-    const tokenInput = document.getElementById('token-input');
-    const toggleTokenBtn = document.getElementById('toggle-token');
-    const applyTokenBtn = document.getElementById('apply-token');
-    const viewModeSelect = document.getElementById('view-mode');
-    const locationSelect = document.getElementById('location-select');
-    const toggle2d3dBtn = document.getElementById('toggle-2d3d');
-    const resetViewBtn = document.getElementById('reset-view');
-    const flyHomeBtn = document.getElementById('fly-home');
-    const zoomInBtn = document.getElementById('zoom-in');
-    const zoomOutBtn = document.getElementById('zoom-out');
-    const compassBtn = document.getElementById('compass');
-    const latValue = document.getElementById('lat-value');
-    const lonValue = document.getElementById('lon-value');
-    const altValue = document.getElementById('alt-value');
-    const viewStatus = document.getElementById('view-status');
-    const fpsCounter = document.getElementById('fps-counter');
-    const loadingProgress = document.getElementById('loading-progress');
-    const progressBar = document.querySelector('.progress-bar');
-    const progressText = document.querySelector('.progress-text');
-    const layerItems = document.querySelectorAll('.layer-item');
-    
-    // Event Listeners
-    toggleTokenBtn.addEventListener('click', toggleTokenVisibility);
-    applyTokenBtn.addEventListener('click', initializeCesiumViewer);
-    viewModeSelect.addEventListener('change', changeViewMode);
-    locationSelect.addEventListener('change', flyToLocation);
-    toggle2d3dBtn.addEventListener('click', toggle2D3D);
-    resetViewBtn.addEventListener('click', resetView);
-    flyHomeBtn.addEventListener('click', flyHome);
-    zoomInBtn.addEventListener('click', zoomIn);
-    zoomOutBtn.addEventListener('click', zoomOut);
-    compassBtn.addEventListener('click', resetCompass);
-    
-    // Event listeners untuk layer selection
-    layerItems.forEach(item => {
-        item.addEventListener('click', function() {
-            const layerType = this.getAttribute('data-layer');
-            toggleLayer(layerType, this);
-        });
-    });
-    
-    // Fungsi untuk toggle visibilitas token
-    function toggleTokenVisibility() {
-        const type = tokenInput.getAttribute('type');
-        const newType = type === 'password' ? 'text' : 'password';
-        tokenInput.setAttribute('type', newType);
-        
-        const icon = toggleTokenBtn.querySelector('i');
-        icon.className = newType === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
-    }
-    
-    // Fungsi untuk inisialisasi Cesium Viewer
-    function initializeCesiumViewer() {
-        // Ambil token dari input
-        cesiumAccessToken = tokenInput.value.trim();
-        
-        if (!cesiumAccessToken) {
-            alert('Silakan masukkan token akses Cesium Ion');
-            return;
-        }
-        
-        // Set Cesium Ion access token
-        Cesium.Ion.defaultAccessToken = cesiumAccessToken;
-        
-        // Tampilkan loading progress
-        showLoadingProgress(true);
-        
-        // Hancurkan viewer sebelumnya jika ada
-        if (viewer && !viewer.isDestroyed()) {
-            viewer.destroy();
-        }
-        
-        // Inisialisasi viewer Cesium
-        try {
-            viewer = new Cesium.Viewer('cesium-container', {
-                baseLayerPicker: false,
-                geocoder: false,
-                homeButton: false,
-                sceneModePicker: false,
-                navigationHelpButton: false,
-                animation: false,
-                timeline: false,
-                fullscreenButton: false,
-                infoBox: false,
-                selectionIndicator: false,
-                shadows: true,
-                terrainShadows: Cesium.ShadowMode.ENABLED,
-                shouldAnimate: true,
-                scene3DOnly: false,
-                imageryProvider: new Cesium.BingMapsImageryProvider({
-                    url: 'https://dev.virtualearth.net',
-                    key: Cesium.BingMapsApi.getKey() || 'YOUR_BING_MAPS_KEY', // Ganti dengan Bing Maps key Anda
-                    mapStyle: Cesium.BingMapsStyle.AERIAL
-                }),
-                terrainProvider: Cesium.createWorldTerrain({
-                    requestWaterMask: true,
-                    requestVertexNormals: true
-                })
-            });
-            
-            // Tambahkan 3D buildings dari Cesium Ion
-            const buildingTileset = viewer.scene.primitives.add(
-                new Cesium.Cesium3DTileset({
-                    url: Cesium.IonResource.fromAssetId(96188), // Cesium OSM Buildings asset ID
-                    maximumScreenSpaceError: 2,
-                    maximumNumberOfLoadedTiles: 1000,
-                    shadows: Cesium.ShadowMode.ENABLED
-                })
-            );
-            
-            // Setup event handlers setelah viewer siap
-            setupViewerEventHandlers();
-            
-            // Terbang ke lokasi default
-            flyToLocation();
-            
-            // Update status
-            viewStatus.textContent = 'Mode: 3D Globe';
-            
-            // Setup FPS counter
-            setupFPSCounter();
-            
-            // Sembunyikan loading progress
-            setTimeout(() => {
-                showLoadingProgress(false);
-            }, 1500);
-            
-        } catch (error) {
-            console.error('Error initializing Cesium viewer:', error);
-            alert('Gagal menginisialisasi viewer. Periksa token dan koneksi internet Anda.');
-            showLoadingProgress(false);
-        }
-    }
-    
-    // Setup event handlers untuk viewer
-    function setupViewerEventHandlers() {
-        if (!viewer) return;
-        
-        // Update posisi kamera secara real-time
-        viewer.scene.postRender.addEventListener(function() {
-            if (viewer.camera) {
-                const cartographic = Cesium.Cartographic.fromCartesian(viewer.camera.position);
-                const lat = Cesium.Math.toDegrees(cartographic.latitude).toFixed(4);
-                const lon = Cesium.Math.toDegrees(cartographic.longitude).toFixed(4);
-                const alt = Math.max(0, cartographic.height).toFixed(0);
-                
-                latValue.textContent = `${lat}°`;
-                lonValue.textContent = `${lon}°`;
-                altValue.textContent = `${alt} m`;
-            }
-        });
-        
-        // Handle loading progress
-        viewer.scene.globe.tileLoadProgressEvent.addEventListener(function(progress) {
-            const total = viewer.scene.globe.tilesLoaded + progress;
-            if (total > 0) {
-                const percent = Math.min(100, Math.round((viewer.scene.globe.tilesLoaded / total) * 100));
-                updateLoadingProgress(percent);
-            }
-        });
-    }
-    
-    // Fungsi untuk mengubah mode tampilan
-    function changeViewMode() {
-        if (!viewer) return;
-        
-        const mode = viewModeSelect.value;
-        
-        switch(mode) {
-            case '2D':
-                viewer.scene.mode = Cesium.SceneMode.SCENE2D;
-                viewStatus.textContent = 'Mode: 2D Map';
-                is2DMode = true;
-                break;
-            case '3D':
-                viewer.scene.mode = Cesium.SceneMode.SCENE3D;
-                viewStatus.textContent = 'Mode: 3D Globe';
-                is2DMode = false;
-                break;
-            case 'columbus':
-                viewer.scene.mode = Cesium.SceneMode.COLUMBUS_VIEW;
-                viewStatus.textContent = 'Mode: Columbus View';
-                is2DMode = false;
-                break;
-        }
-    }
-    
-    // Fungsi untuk terbang ke lokasi yang dipilih
-    function flyToLocation() {
-        if (!viewer) return;
-        
-        currentLocation = locationSelect.value;
-        const location = locations[currentLocation];
-        
-        viewer.camera.flyTo({
-            destination: Cesium.Cartesian3.fromDegrees(location.lon, location.lat, location.alt),
-            orientation: {
-                heading: Cesium.Math.toRadians(location.heading),
-                pitch: Cesium.Math.toRadians(location.pitch),
-                roll: 0.0
-            },
-            duration: 2.0,
-            complete: function() {
-                console.log(`Terbang ke ${currentLocation} selesai`);
-            }
-        });
-    }
-    
-    // Fungsi untuk toggle antara mode 2D dan 3D
-    function toggle2D3D() {
-        if (!viewer) return;
-        
-        if (is2DMode) {
-            viewer.scene.mode = Cesium.SceneMode.SCENE3D;
-            viewStatus.textContent = 'Mode: 3D Globe';
-            is2DMode = false;
-            viewModeSelect.value = '3D';
-        } else {
-            viewer.scene.mode = Cesium.SceneMode.SCENE2D;
-            viewStatus.textContent = 'Mode: 2D Map';
-            is2DMode = true;
-            viewModeSelect.value = '2D';
-        }
-    }
-    
-    // Fungsi untuk reset view
-    function resetView() {
-        if (!viewer) return;
-        
-        viewer.camera.setView({
-            destination: Cesium.Cartesian3.fromDegrees(0, 0, 20000000),
-            orientation: {
-                heading: 0,
-                pitch: -Cesium.Math.PI_OVER_TWO,
-                roll: 0
-            }
-        });
-    }
-    
-    // Fungsi untuk terbang ke home (lokasi default)
-    function flyHome() {
-        if (!viewer) return;
-        
-        viewer.camera.flyHome(2.0);
-    }
-    
-    // Fungsi untuk zoom in
-    function zoomIn() {
-        if (!viewer) return;
-        
-        const camera = viewer.camera;
-        const distance = Cesium.Cartesian3.distance(camera.position, camera.positionWC);
-        const moveAmount = distance * 0.5;
-        
-        camera.moveForward(moveAmount);
-    }
-    
-    // Fungsi untuk zoom out
-    function zoomOut() {
-        if (!viewer) return;
-        
-        const camera = viewer.camera;
-        const distance = Cesium.Cartesian3.distance(camera.position, camera.positionWC);
-        const moveAmount = distance * 0.5;
-        
-        camera.moveBackward(moveAmount);
-    }
-    
-    // Fungsi untuk reset kompas (heading)
-    function resetCompass() {
-        if (!viewer) return;
-        
-        viewer.camera.setView({
-            orientation: {
-                heading: 0,
-                pitch: viewer.camera.pitch,
-                roll: 0
-            }
-        });
-    }
-    
-    // Fungsi untuk toggle layer
-    function toggleLayer(layerType, element) {
-        if (!viewer) return;
-        
-        // Hapus class active dari semua layer items
-        layerItems.forEach(item => {
-            item.classList.remove('active');
-        });
-        
-        // Tambah class active ke layer yang dipilih
-        element.classList.add('active');
-        
-        // Update layer berdasarkan tipe
-        switch(layerType) {
-            case 'bing':
-                viewer.imageryLayers.removeAll();
-                viewer.imageryLayers.addImageryProvider(new Cesium.BingMapsImageryProvider({
-                    url: 'https://dev.virtualearth.net',
-                    key: Cesium.BingMapsApi.getKey() || 'YOUR_BING_MAPS_KEY',
-                    mapStyle: Cesium.BingMapsStyle.AERIAL
-                }));
-                break;
-                
-            case 'osm':
-                viewer.imageryLayers.removeAll();
-                viewer.imageryLayers.addImageryProvider(new Cesium.OpenStreetMapImageryProvider({
-                    url: 'https://tile.openstreetmap.org/'
-                }));
-                break;
-                
-            case 'terrain':
-                // Cesium World Terrain sudah diatur sebagai default
-                viewer.terrainProvider = Cesium.createWorldTerrain({
-                    requestWaterMask: true,
-                    requestVertexNormals: true
-                });
-                break;
-                
-            case 'buildings':
-                // Toggle 3D buildings
-                const tilesets = viewer.scene.primitives._primitives;
-                tilesets.forEach(tileset => {
-                    if (tileset instanceof Cesium.Cesium3DTileset) {
-                        tileset.show = !tileset.show;
-                    }
-                });
-                break;
-        }
-    }
-    
-    // Fungsi untuk menampilkan/menyembunyikan loading progress
-    function showLoadingProgress(show) {
-        if (show) {
-            loadingProgress.style.display = 'block';
-            updateLoadingProgress(0);
-        } else {
-            loadingProgress.style.display = 'none';
-        }
-    }
-    
-    // Fungsi untuk update loading progress
-    function updateLoadingProgress(percent) {
-        if (progressBar && progressText) {
-            progressBar.style.width = `${percent}%`;
-            progressText.textContent = percent === 100 ? 'Siap!' : `Loading... ${percent}%`;
-        }
-    }
-    
-    // Setup FPS counter
-    function setupFPSCounter() {
-        if (!viewer) return;
-        
-        let frameCount = 0;
-        let lastTime = performance.now();
-        
-        viewer.scene.postRender.addEventListener(function() {
-            frameCount++;
-            const currentTime = performance.now();
-            
-            if (currentTime - lastTime >= 1000) {
-                const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
-                fpsCounter.textContent = `FPS: ${fps}`;
-                
-                frameCount = 0;
-                lastTime = currentTime;
-            }
-        });
-    }
-    
-    // Inisialisasi default dengan token contoh
-    // Catatan: Ganti dengan token Cesium Ion Anda sendiri
-    const defaultToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0YjQ4NTk0NS0wZmE5LTQ3ZWEtOTEzYy0xZTZhN2E4NmU5MTgiLCJpZCI6MjEzNjk3LCJpYXQiOjE3NjU4NzQxMzd9.rWDk_DtxtgruoJjwcQovfDqYAAUoBPUI531Bm7LvH8U';
-    tokenInput.value = defaultToken;
-    
-    // Inisialisasi viewer saat halaman dimuat
-    setTimeout(() => {
-        initializeCesiumViewer();
-    }, 500);
+/* ===========================
+   Konfigurasi wajib (ISI INI)
+   =========================== */
+const ION_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0YjQ4NTk0NS0wZmE5LTQ3ZWEtOTEzYy0xZTZhN2E4NmU5MTgiLCJpZCI6MjEzNjk3LCJpYXQiOjE3NjU4NzQxMzd9.rWDk_DtxtgruoJjwcQovfDqYAAUoBPUI531Bm7LvH8U";
+
+// Asset dari Cesium ion:
+// - 3D Buildings: 3D Tileset (Cesium3DTileset)
+// - 2D Buildings: GeoJSON/TopoJSON (GeoJsonDataSource) atau 3D Tiles juga (jika 2D anda sebenarnya tiles)
+const ION_ASSET_ID_BUILDINGS_3D = 4224210; // <-- ganti: contoh 123456
+const ION_ASSET_ID_BUILDINGS_2D = 4224206; // <-- ganti: contoh 234567
+
+// Pusat Terban (zoom awal)
+const TERBAN_CENTER = {
+  lon: 110.3751182,
+  lat: -7.7791734,
+  height: 1500
+};
+
+// Basemap malam (gelap). Pastikan mematuhi terms penyedia tile.
+const NIGHT_TILE_URL = "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png";
+
+/* ===========================
+   Inisialisasi Cesium Viewer
+   =========================== */
+Cesium.Ion.defaultAccessToken = ION_ACCESS_TOKEN;
+
+const statusEl = document.getElementById("status");
+const setStatus = (msg) => { statusEl.textContent = msg; };
+
+const viewer = new Cesium.Viewer("cesiumContainer", {
+  animation: false,
+  timeline: false,
+  geocoder: true,
+  homeButton: true,
+  sceneModePicker: true,
+  navigationHelpButton: false,
+  baseLayerPicker: false,
+  selectionIndicator: true,
+  infoBox: true,
+  // Basemap siang: OpenStreetMap
+  imageryProvider: new Cesium.OpenStreetMapImageryProvider({
+    url: "https://tile.openstreetmap.org/"
+  }),
+  terrainProvider: Cesium.createWorldTerrain()
 });
+
+viewer.scene.globe.enableLighting = true;
+viewer.shadows = true;
+viewer.scene.shadowMap.enabled = true;
+
+// Disable default double-click zoom (agar nyaman untuk digitizing)
+viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
+// Zoom awal ke Terban
+viewer.camera.flyTo({
+  destination: Cesium.Cartesian3.fromDegrees(TERBAN_CENTER.lon, TERBAN_CENTER.lat, TERBAN_CENTER.height)
+});
+
+/* ===========================
+   Basemap: Day / Night
+   =========================== */
+let dayLayer = viewer.imageryLayers.get(0);
+let nightLayer = null;
+
+function setDayBasemap() {
+  if (nightLayer) viewer.imageryLayers.remove(nightLayer, false);
+  nightLayer = null;
+  if (!viewer.imageryLayers.contains(dayLayer)) viewer.imageryLayers.add(dayLayer, 0);
+  dayLayer.show = true;
+  setStatus("Basemap: OpenStreetMap (siang).");
+}
+
+function setNightBasemap() {
+  if (!nightLayer) {
+    nightLayer = viewer.imageryLayers.addImageryProvider(
+      new Cesium.UrlTemplateImageryProvider({ url: NIGHT_TILE_URL }),
+      0
+    );
+  }
+  dayLayer.show = false;
+  setStatus("Basemap: mode malam (gelap).");
+}
+
+/* ===========================
+   Load Buildings 3D & 2D dari ion
+   =========================== */
+let tileset3D = null;
+let buildings2D = null;
+
+async function loadIonLayers() {
+  try {
+    // 3D Tiles
+    if (ION_ASSET_ID_BUILDINGS_3D && ION_ASSET_ID_BUILDINGS_3D !== 0) {
+      tileset3D = await Cesium.Cesium3DTileset.fromIonAssetId(ION_ASSET_ID_BUILDINGS_3D);
+      viewer.scene.primitives.add(tileset3D);
+    }
+
+    // 2D (GeoJSON) dari ion
+    if (ION_ASSET_ID_BUILDINGS_2D && ION_ASSET_ID_BUILDINGS_2D !== 0) {
+      const res2D = await Cesium.IonResource.fromAssetId(ION_ASSET_ID_BUILDINGS_2D);
+      buildings2D = await Cesium.GeoJsonDataSource.load(res2D, {
+        clampToGround: true
+      });
+
+      // Styling sederhana untuk polygon footprint
+      viewer.dataSources.add(buildings2D);
+      buildings2D.entities.values.forEach((e) => {
+        if (e.polygon) {
+          e.polygon.material = Cesium.Color.CYAN.withAlpha(0.25);
+          e.polygon.outline = true;
+          e.polygon.outlineColor = Cesium.Color.CYAN.withAlpha(0.9);
+        }
+      });
+    }
+
+    // Fly to layer jika tersedia
+    if (tileset3D) {
+      await viewer.zoomTo(tileset3D);
+    } else if (buildings2D) {
+      await viewer.zoomTo(buildings2D);
+    } else {
+      setStatus("Layer ion belum dimuat: isi ION_ASSET_ID_BUILDINGS_3D / ION_ASSET_ID_BUILDINGS_2D di app.js.");
+      return;
+    }
+
+    setStatus("Buildings 2D/3D berhasil dimuat dari Cesium ion.");
+  } catch (err) {
+    console.error(err);
+    setStatus("Gagal memuat layer dari Cesium ion. Pastikan token valid, assetId benar, dan asset dapat diakses.");
+  }
+}
+loadIonLayers();
+
+/* ===========================
+   Toggle 2D / 3D
+   =========================== */
+document.getElementById("toggle3d").addEventListener("change", (e) => {
+  if (tileset3D) tileset3D.show = e.target.checked;
+});
+
+document.getElementById("toggle2d").addEventListener("change", (e) => {
+  if (buildings2D) buildings2D.show = e.target.checked;
+});
+
+document.getElementById("btnDay").addEventListener("click", setDayBasemap);
+document.getElementById("btnNight").addEventListener("click", setNightBasemap);
+
+/* ===========================
+   Util: ambil posisi di permukaan bumi/objek
+   =========================== */
+function pickWorldPosition(screenPosition) {
+  // Prioritaskan pickPosition (bisa kena 3D tiles), fallback ke globe.pick
+  if (viewer.scene.pickPositionSupported) {
+    const p = viewer.scene.pickPosition(screenPosition);
+    if (Cesium.defined(p)) return p;
+  }
+  const ray = viewer.camera.getPickRay(screenPosition);
+  return viewer.scene.globe.pick(ray, viewer.scene);
+}
+
+function cartesianToLonLat(cart) {
+  const c = Cesium.Cartographic.fromCartesian(cart);
+  return [Cesium.Math.toDegrees(c.longitude), Cesium.Math.toDegrees(c.latitude)];
+}
+
+/* ===========================
+   Measure: Line & Area (Turf)
+   =========================== */
+let handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+let mode = "none"; // none | line | area | sun
+let points = [];
+let tempPoint = null;
+let drawEntity = null;
+let pointEntities = [];
+let resultLabel = null;
+
+function clearDrawings() {
+  points = [];
+  tempPoint = null;
+  mode = "none";
+
+  if (drawEntity) viewer.entities.remove(drawEntity);
+  drawEntity = null;
+
+  if (resultLabel) viewer.entities.remove(resultLabel);
+  resultLabel = null;
+
+  pointEntities.forEach((pe) => viewer.entities.remove(pe));
+  pointEntities = [];
+
+  // hapus arrow sun (jika ada)
+  viewer.entities.values
+    .filter(e => e._isSunArrow)
+    .forEach(e => viewer.entities.remove(e));
+
+  setStatus("Clear selesai.");
+}
+
+function addPointMarker(pos) {
+  const ent = viewer.entities.add({
+    position: pos,
+    point: { pixelSize: 8, outlineWidth: 2 }
+  });
+  pointEntities.push(ent);
+}
+
+function startMeasureLine() {
+  clearDrawings();
+  mode = "line";
+  setStatus("Mode Ukur Panjang: klik untuk menambah titik, klik kanan untuk selesai.");
+}
+
+function startMeasureArea() {
+  clearDrawings();
+  mode = "area";
+  setStatus("Mode Ukur Luas: klik untuk menambah titik, klik kanan untuk selesai.");
+}
+
+function ensureDynamicEntity() {
+  if (mode === "line" && !drawEntity) {
+    drawEntity = viewer.entities.add({
+      polyline: {
+        positions: new Cesium.CallbackProperty(() => {
+          const arr = points.slice();
+          if (tempPoint) arr.push(tempPoint);
+          return arr;
+        }, false),
+        width: 3
+      }
+    });
+  }
+  if (mode === "area" && !drawEntity) {
+    drawEntity = viewer.entities.add({
+      polygon: {
+        hierarchy: new Cesium.CallbackProperty(() => {
+          const arr = points.slice();
+          if (tempPoint) arr.push(tempPoint);
+          return new Cesium.PolygonHierarchy(arr);
+        }, false),
+        material: Cesium.Color.YELLOW.withAlpha(0.25),
+        outline: true,
+        outlineColor: Cesium.Color.YELLOW.withAlpha(0.9)
+      }
+    });
+  }
+}
+
+function finalizeMeasurement() {
+  if (points.length < (mode === "line" ? 2 : 3)) {
+    setStatus("Titik belum cukup untuk menghitung.");
+    return;
+  }
+
+  const coords = points.map(cartesianToLonLat);
+
+  if (mode === "line") {
+    const line = turf.lineString(coords);
+    const km = turf.length(line, { units: "kilometers" });
+    const meters = km * 1000;
+
+    const last = points[points.length - 1];
+    resultLabel = viewer.entities.add({
+      position: last,
+      label: {
+        text: `Panjang: ${meters.toFixed(2)} m`,
+        showBackground: true,
+        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        pixelOffset: new Cesium.Cartesian2(0, -12)
+      }
+    });
+
+    setStatus(`Hasil: Panjang = ${meters.toFixed(2)} m`);
+  }
+
+  if (mode === "area") {
+    // pastikan polygon tertutup untuk Turf
+    const ring = coords.concat([coords[0]]);
+    const poly = turf.polygon([ring]);
+    const areaM2 = turf.area(poly);
+
+    const centroid = turf.centroid(poly).geometry.coordinates;
+    const centroidPos = Cesium.Cartesian3.fromDegrees(centroid[0], centroid[1], 0);
+
+    resultLabel = viewer.entities.add({
+      position: centroidPos,
+      label: {
+        text: `Luas: ${areaM2.toFixed(2)} m²`,
+        showBackground: true,
+        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        pixelOffset: new Cesium.Cartesian2(0, -12)
+      }
+    });
+
+    setStatus(`Hasil: Luas = ${areaM2.toFixed(2)} m²`);
+  }
+
+  mode = "none";
+  tempPoint = null;
+}
+
+handler.setInputAction((click) => {
+  const pos = pickWorldPosition(click.position);
+  if (!Cesium.defined(pos)) return;
+
+  if (mode === "line" || mode === "area") {
+    points.push(pos);
+    addPointMarker(pos);
+    ensureDynamicEntity();
+  } else if (mode === "sun") {
+    // sun arrow: klik 1 titik saja
+    drawSunArrowAtNoon(pos);
+    mode = "none";
+  }
+}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+handler.setInputAction((movement) => {
+  if (mode !== "line" && mode !== "area") return;
+  const pos = pickWorldPosition(movement.endPosition);
+  if (!Cesium.defined(pos)) return;
+  tempPoint = pos;
+  ensureDynamicEntity();
+}, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+handler.setInputAction(() => {
+  if (mode === "line" || mode === "area") {
+    finalizeMeasurement();
+  }
+}, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+
+document.getElementById("btnMeasureLine").addEventListener("click", startMeasureLine);
+document.getElementById("btnMeasureArea").addEventListener("click", startMeasureArea);
+document.getElementById("btnClear").addEventListener("click", clearDrawings);
+
+/* ===========================
+   Sun direction at local noon (WIB)
+   - Set jam 12:00 WIB untuk rendering lighting/shadows
+   - Klik titik -> gambar panah arah azimuth matahari
+   =========================== */
+function setLocalNoonWIB() {
+  const now = new Date();
+  // WIB = UTC+7 -> local 12:00 WIB = 05:00 UTC
+  const y = now.getUTCFullYear();
+  const m = now.getUTCMonth();
+  const d = now.getUTCDate();
+
+  const noonUtc = new Date(Date.UTC(y, m, d, 5, 0, 0)); // 12:00 WIB
+  viewer.clock.currentTime = Cesium.JulianDate.fromDate(noonUtc);
+  viewer.clock.shouldAnimate = false;
+
+  setStatus(`Waktu diset ke 12:00 WIB (render lighting/shadows).`);
+}
+
+function drawSunArrowAtNoon(cartPos) {
+  const [lon, lat] = cartesianToLonLat(cartPos);
+
+  // Noon WIB untuk tanggal hari ini (lokal)
+  const now = new Date();
+  const localNoon = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
+
+  // SunCalc: azimuth rad (0 = selatan, + ke barat)
+  const sun = SunCalc.getPosition(localNoon, lat, lon);
+  const azDegFromSouth = Cesium.Math.toDegrees(sun.azimuth);
+  const bearingFromNorth = (azDegFromSouth + 180 + 360) % 360; // konversi ke bearing 0..360 dari utara
+  const altitudeDeg = Cesium.Math.toDegrees(sun.altitude);
+
+  // Buat panah 200 meter mengikuti bearing
+  const start = turf.point([lon, lat]);
+  const end = turf.destination(start, 0.2, bearingFromNorth, { units: "kilometers" }).geometry.coordinates;
+
+  const endPos = Cesium.Cartesian3.fromDegrees(end[0], end[1], 0);
+
+  // Hapus panah lama (jika ada)
+  viewer.entities.values
+    .filter(e => e._isSunArrow)
+    .forEach(e => viewer.entities.remove(e));
+
+  const arrow = viewer.entities.add({
+    polyline: {
+      positions: [cartPos, endPos],
+      width: 4
+    },
+    label: {
+      text: `Sun azimuth: ${bearingFromNorth.toFixed(1)}° | elev: ${altitudeDeg.toFixed(1)}°`,
+      showBackground: true,
+      verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+      pixelOffset: new Cesium.Cartesian2(0, -14)
+    }
+  });
+  arrow._isSunArrow = true;
+
+  setStatus(`Arah matahari (12:00 WIB): azimuth ${bearingFromNorth.toFixed(1)}°, elev ${altitudeDeg.toFixed(1)}°.`);
+}
+
+document.getElementById("btnNoon").addEventListener("click", setLocalNoonWIB);
+document.getElementById("btnSunDir").addEventListener("click", () => {
+  mode = "sun";
+  setStatus("Mode Sun Direction: klik 1 titik di peta untuk menampilkan panah arah sinar matahari jam 12:00 WIB.");
+});
+
+/* ===========================
+   OGC API - Features
+   - Load collections: GET {base}/collections?f=json
+   - Add layer: GET {base}/collections/{id}/items?f=geojson&limit=...&bbox=...
+   =========================== */
+const ogcBaseUrlEl = document.getElementById("ogcBaseUrl");
+const ogcCollectionsEl = document.getElementById("ogcCollections");
+
+function normalizeBaseUrl(url) {
+  return (url || "").trim().replace(/\/+$/, "");
+}
+
+function getCurrentViewBbox() {
+  const rect = viewer.camera.computeViewRectangle(viewer.scene.globe.ellipsoid);
+  if (!rect) return null;
+
+  const west = Cesium.Math.toDegrees(rect.west);
+  const south = Cesium.Math.toDegrees(rect.south);
+  const east = Cesium.Math.toDegrees(rect.east);
+  const north = Cesium.Math.toDegrees(rect.north);
+  return [west, south, east, north];
+}
+
+async function loadOgcCollections() {
+  const base = normalizeBaseUrl(ogcBaseUrlEl.value);
+  if (!base) {
+    setStatus("Isi Base URL OGC API terlebih dulu.");
+    return;
+  }
+
+  try {
+    setStatus("Mengambil daftar collections...");
+    const url = `${base}/collections?f=json`;
+    const json = await fetch(url).then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    });
+
+    const collections = json.collections || [];
+    ogcCollectionsEl.innerHTML = "";
+
+    collections.forEach((c) => {
+      const opt = document.createElement("option");
+      opt.value = c.id;
+      opt.textContent = c.title ? `${c.title} (${c.id})` : c.id;
+      ogcCollectionsEl.appendChild(opt);
+    });
+
+    if (collections.length === 0) {
+      setStatus("Tidak ada collections ditemukan (atau format respons berbeda).");
+      return;
+    }
+
+    setStatus(`Collections loaded: ${collections.length} item.`);
+  } catch (err) {
+    console.error(err);
+    setStatus("Gagal load collections. Cek URL, CORS, atau format OGC API server.");
+  }
+}
+
+async function addOgcLayer() {
+  const base = normalizeBaseUrl(ogcBaseUrlEl.value);
+  const collectionId = ogcCollectionsEl.value;
+  if (!base || !collectionId) {
+    setStatus("Base URL / Collection belum dipilih.");
+    return;
+  }
+
+  try {
+    const bbox = getCurrentViewBbox();
+    const limit = 1000;
+
+    // Banyak server OGC API mendukung bbox & limit
+    const url = bbox
+      ? `${base}/collections/${encodeURIComponent(collectionId)}/items?f=geojson&limit=${limit}&bbox=${bbox.join(",")}`
+      : `${base}/collections/${encodeURIComponent(collectionId)}/items?f=geojson&limit=${limit}`;
+
+    setStatus(`Memuat OGC layer: ${collectionId} ...`);
+
+    const geojson = await fetch(url).then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    });
+
+    const ds = await Cesium.GeoJsonDataSource.load(geojson, {
+      clampToGround: true
+    });
+    viewer.dataSources.add(ds);
+    await viewer.zoomTo(ds);
+
+    setStatus(`OGC layer ditambahkan: ${collectionId}`);
+  } catch (err) {
+    console.error(err);
+    setStatus("Gagal menambahkan OGC layer. Kemungkinan: CORS, paging besar, atau server tidak mendukung f=geojson.");
+  }
+}
+
+document.getElementById("btnLoadCollections").addEventListener("click", loadOgcCollections);
+document.getElementById("btnAddOgcLayer").addEventListener("click", addOgcLayer);
