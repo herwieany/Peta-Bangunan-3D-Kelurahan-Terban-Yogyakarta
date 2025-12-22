@@ -54,7 +54,23 @@ async function init() {
     }),
     terrainProvider: new Cesium.EllipsoidTerrainProvider()
   });
+// PAKSA basemap OpenStreetMap tampil
+viewer.imageryLayers.removeAll(true);
 
+const osmLayer = viewer.imageryLayers.addImageryProvider(
+  new Cesium.OpenStreetMapImageryProvider({
+    url: "https://tile.openstreetmap.org/"
+  }),
+  0
+);
+
+osmLayer.show = true;
+osmLayer.alpha = 1.0;
+
+// Pastikan globe tidak dimatikan
+viewer.scene.globe.show = true;
+
+   
   // 2) Optional: World Terrain versi baru (async)
   try {
     if (typeof Cesium.createWorldTerrainAsync === "function") {
