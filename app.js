@@ -88,6 +88,17 @@ async function init() {
   // Load ion
   setStatus("Memuat layer Cesium ion...");
   await loadIonLayers();
+   
+async function applyTilesetHeightOffset(tileset, offsetMeters) {
+  const bs = tileset.boundingSphere;
+  const carto = Cesium.Cartographic.fromCartesian(bs.center);
+
+  const surface = Cesium.Cartesian3.fromRadians(carto.longitude, carto.latitude, carto.height);
+  const offset  = Cesium.Cartesian3.fromRadians(carto.longitude, carto.latitude, carto.height + offsetMeters);
+
+  const translation = Cesium.Cartesian3.subtract(offset, surface, new Cesium.Cartesian3());
+  tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
+}
 
   // UI hooks
   document.getElementById("toggle3d").addEventListener("change", (e) => {
