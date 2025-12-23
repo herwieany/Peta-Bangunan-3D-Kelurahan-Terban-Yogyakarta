@@ -1,13 +1,22 @@
-console.log("APP VERSION 20251223_2");
+console.log("APP VERSION 20251223_FIXED");
 
 /* ===========================
    Konfigurasi
    =========================== */
-const ION_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0YjQ4NTk0NS0wZmE5LTQ3ZWEtOTEzYy0xZTZhN2E4NmU5MTgiLCJpZCI6MjEzNjk3LCJpYXQiOjE3NjU4NzQxMzd9.rWDk_DtxtgruoJjwcQovfDqYAAUoBPUI531Bm7LvH8U";
+const ION_ACCESS_TOKEN = "PASTE_TOKEN_ANDA_DI_SINI";
 const ION_ASSET_ID_BUILDINGS_3D = 4224210; // 3D Tiles
 const ION_ASSET_ID_BUILDINGS_2D = 4224206; // GeoJSON
 
 const TERBAN_CENTER = { lon: 110.3751182, lat: -7.7791734, height: 1500 };
+
+// Offset 3D (meter) agar tidak mengambang.
+// Negatif = turun, positif = naik.
+const TILESET_OFFSET_UP_METERS = -10; // coba -5, -10, -15, -20 dst
+const TILESET_OFFSET_EAST_METERS = 0;
+const TILESET_OFFSET_NORTH_METERS = 0;
+
+// Detail 3D tiles (lebih kecil = lebih detail, lebih berat)
+const TILESET_MAX_SSE = 2; // 2 atau 1
 
 /* ===========================
    Global
@@ -15,7 +24,7 @@ const TERBAN_CENTER = { lon: 110.3751182, lat: -7.7791734, height: 1500 };
 Cesium.Ion.defaultAccessToken = ION_ACCESS_TOKEN;
 
 const statusEl = document.getElementById("status");
-const setStatus = (msg) => { statusEl.textContent = msg; };
+const setStatus = (msg) => { if (statusEl) statusEl.textContent = msg; };
 
 let viewer;
 
@@ -29,6 +38,34 @@ let tempPoint = null;
 let drawEntity = null;
 let pointEntities = [];
 let resultLabel = null;
+
+/* ===========================
+   Helper: aman untuk addEventListener
+   =========================== */
+function on(id, event, fn) {
+  const el = document.getElementById(id);
+  if (!el) {
+    console.warn(`Element #${id} tidak ditemukan di HTML`);
+    return;
+  }
+  el.addEventListener(event, fn);
+}
+
+/* ===========================
+   Offset 3D Tileset (ENU)
+   =========================== */
+function applyTilesetOffsetENU(tileset, eastMeters, northMeters, upMeters) {
+  const center = tileset.boundingSphere.center;
+  const enuTransform = Cesium.Transforms.eastNorthUpToFixedFrame(center);
+
+  const offsetECEF = Cesium.Matrix4.multiplyByPointAsVector(
+    enuTransform,
+    new Cesium.Cartesian3(eastMeters, northMeters, upMeters),
+    new Cesium.Cartesian3()
+  );
+
+  tileset.modelMatrix = Cesium.Matrix4.fromTranslation(offsetECEF);
+}
 
 /* ===========================
    Init
@@ -54,14 +91,14 @@ async function init() {
     terrainProvider: new Cesium.EllipsoidTerrainProvider()
   });
 
-  // PAKSA basemap OSM tampil (OSM-only)
+  // Basemap: OSM-only (paksa)
   viewer.imageryLayers.removeAll(true);
   viewer.imageryLayers.addImageryProvider(
     new Cesium.OpenStreetMapImageryProvider({ url: "https://tile.openstreetmap.org/" }),
     0
   );
 
-  // optional: World Terrain (jika tersedia)
+  // Optional: World Terrain (jika tersedia)
   try {
     if (typeof Cesium.createWorldTerrainAsync === "function") {
       viewer.terrainProvider = await Cesium.createWorldTerrainAsync();
@@ -70,15 +107,17 @@ async function init() {
     console.warn("WorldTerrain gagal, tetap ellipsoid:", e);
   }
 
-  // Setup scene (biar OSM normal, lighting dimatikan)
+  // Scene setup (OSM normal)
   viewer.scene.globe.show = true;
   viewer.scene.globe.enableLighting = false;
   viewer.shadows = false;
 
+  // Disable double click zoom
   viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(
     Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK
   );
 
+  // Fly to Terban
   viewer.camera.flyTo({
     destination: Cesium.Cartesian3.fromDegrees(
       TERBAN_CENTER.lon, TERBAN_CENTER.lat, TERBAN_CENTER.height
@@ -88,38 +127,23 @@ async function init() {
   // Load ion
   setStatus("Memuat layer Cesium ion...");
   await loadIonLayers();
-   
-async function applyTilesetHeightOffset(tileset, offsetMeters) {
-  const bs = tileset.boundingSphere;
-  const carto = Cesium.Cartographic.fromCartesian(bs.center);
 
-  const surface = Cesium.Cartesian3.fromRadians(carto.longitude, carto.latitude, carto.height);
-  const offset  = Cesium.Cartesian3.fromRadians(carto.longitude, carto.latitude, carto.height + offsetMeters);
+  // UI hooks (pakai helper on() supaya tidak crash kalau elemen belum ada)
+  on("toggle3d", "change", (e) => { if (tileset3D) tileset3D.show = e.target.checked; });
+  on("toggle2d", "change", (e) => { if (buildings2D) buildings2D.show = e.target.checked; });
 
-  const translation = Cesium.Cartesian3.subtract(offset, surface, new Cesium.Cartesian3());
-  tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
-}
+  on("btnMeasureLine", "click", startMeasureLine);
+  on("btnMeasureArea", "click", startMeasureArea);
+  on("btnClear", "click", clearDrawings);
 
-  // UI hooks
-  document.getElementById("toggle3d").addEventListener("change", (e) => {
-    if (tileset3D) tileset3D.show = e.target.checked;
-  });
-  document.getElementById("toggle2d").addEventListener("change", (e) => {
-    if (buildings2D) buildings2D.show = e.target.checked;
-  });
-
-  document.getElementById("btnMeasureLine").addEventListener("click", startMeasureLine);
-  document.getElementById("btnMeasureArea").addEventListener("click", startMeasureArea);
-  document.getElementById("btnClear").addEventListener("click", clearDrawings);
-
-  document.getElementById("btnNoon").addEventListener("click", setLocalNoonWIB);
-  document.getElementById("btnSunDir").addEventListener("click", () => {
+  on("btnNoon", "click", setLocalNoonWIB);
+  on("btnSunDir", "click", () => {
     mode = "sun";
     setStatus("Mode Sun Direction: klik 1 titik di peta.");
   });
 
-  document.getElementById("btnLoadCollections").addEventListener("click", loadOgcCollections);
-  document.getElementById("btnAddOgcLayer").addEventListener("click", addOgcLayer);
+  on("btnLoadCollections", "click", loadOgcCollections);
+  on("btnAddOgcLayer", "click", addOgcLayer);
 
   // Handler input
   handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
@@ -128,52 +152,44 @@ async function applyTilesetHeightOffset(tileset, offsetMeters) {
   setStatus("Viewer siap. Basemap OSM aktif. Layer ion dimuat.");
 }
 
-function applyTilesetOffsetENU(tileset, eastMeters, northMeters, upMeters) {
-  const center = tileset.boundingSphere.center;
-  const enuTransform = Cesium.Transforms.eastNorthUpToFixedFrame(center);
-
-  const offsetECEF = Cesium.Matrix4.multiplyByPointAsVector(
-    enuTransform,
-    new Cesium.Cartesian3(eastMeters, northMeters, upMeters),
-    new Cesium.Cartesian3()
-  );
-
-  tileset.modelMatrix = Cesium.Matrix4.fromTranslation(offsetECEF);
-}
-
-
 /* ===========================
    Ion layers
    =========================== */
 async function loadIonLayers() {
   try {
+    // --- 3D Tiles (sekali saja)
     if (ION_ASSET_ID_BUILDINGS_3D) {
-      tileset3D = await Cesium.Cesium3DTileset.fromIonAssetId(ION_ASSET_ID_BUILDINGS_3D);
+      tileset3D = await Cesium.Cesium3DTileset.fromIonAssetId(
+        ION_ASSET_ID_BUILDINGS_3D,
+        { maximumScreenSpaceError: TILESET_MAX_SSE }
+      );
       viewer.scene.primitives.add(tileset3D);
+
+      await tileset3D.readyPromise;
+
+      // Offset agar tidak mengambang & lebih sejajar dengan 2D
+      applyTilesetOffsetENU(
+        tileset3D,
+        TILESET_OFFSET_EAST_METERS,
+        TILESET_OFFSET_NORTH_METERS,
+        TILESET_OFFSET_UP_METERS
+      );
     }
 
+    // --- 2D GeoJSON
     if (ION_ASSET_ID_BUILDINGS_2D) {
       const res2D = await Cesium.IonResource.fromAssetId(ION_ASSET_ID_BUILDINGS_2D);
       buildings2D = await Cesium.GeoJsonDataSource.load(res2D, { clampToGround: true });
       viewer.dataSources.add(buildings2D);
 
-      // styling footprint
+      // Styling sederhana (outline polygon di clamp-to-ground akan warning; jadi outline false)
       buildings2D.entities.values.forEach((e) => {
         if (e.polygon) {
-          e.polygon.material = Cesium.Color.CYAN.withAlpha(0.25);
-          e.polygon.outline = true;
-          e.polygon.outlineColor = Cesium.Color.CYAN.withAlpha(0.9);
+          e.polygon.material = Cesium.Color.CYAN.withAlpha(0.20);
+          e.polygon.outline = false;
         }
       });
     }
-     
-if (ION_ASSET_ID_BUILDINGS_3D) {
-  tileset3D = await Cesium.Cesium3DTileset.fromIonAssetId(ION_ASSET_ID_BUILDINGS_3D);
-  viewer.scene.primitives.add(tileset3D);
-
-await tileset3D.readyPromise;
-applyTilesetOffsetENU(tileset3D, 0, 0, -100); // coba -5, -10, -15 dst
-
 
     if (tileset3D) await viewer.zoomTo(tileset3D);
     else if (buildings2D) await viewer.zoomTo(buildings2D);
@@ -218,7 +234,6 @@ function clearDrawings() {
   pointEntities.forEach((pe) => viewer.entities.remove(pe));
   pointEntities = [];
 
-  // hapus panah matahari
   viewer.entities.values
     .filter(e => e._isSunArrow)
     .forEach(e => viewer.entities.remove(e));
@@ -360,11 +375,10 @@ function hookDrawingHandlers() {
    =========================== */
 function setLocalNoonWIB() {
   const now = new Date();
-  // 12:00 WIB = 05:00 UTC
   const y = now.getUTCFullYear();
   const m = now.getUTCMonth();
   const d = now.getUTCDate();
-  const noonUtc = new Date(Date.UTC(y, m, d, 5, 0, 0));
+  const noonUtc = new Date(Date.UTC(y, m, d, 5, 0, 0)); // 12:00 WIB
 
   viewer.clock.currentTime = Cesium.JulianDate.fromDate(noonUtc);
   viewer.clock.shouldAnimate = false;
@@ -426,7 +440,7 @@ function getCurrentViewBbox() {
 }
 
 async function loadOgcCollections() {
-  const base = normalizeBaseUrl(ogcBaseUrlEl.value);
+  const base = normalizeBaseUrl(ogcBaseUrlEl?.value);
   if (!base) { setStatus("Isi Base URL OGC API terlebih dulu."); return; }
 
   try {
@@ -438,13 +452,13 @@ async function loadOgcCollections() {
     });
 
     const collections = json.collections || [];
-    ogcCollectionsEl.innerHTML = "";
+    if (ogcCollectionsEl) ogcCollectionsEl.innerHTML = "";
 
     collections.forEach((c) => {
       const opt = document.createElement("option");
       opt.value = c.id;
       opt.textContent = c.title ? `${c.title} (${c.id})` : c.id;
-      ogcCollectionsEl.appendChild(opt);
+      ogcCollectionsEl?.appendChild(opt);
     });
 
     if (collections.length === 0) {
@@ -459,8 +473,8 @@ async function loadOgcCollections() {
 }
 
 async function addOgcLayer() {
-  const base = normalizeBaseUrl(ogcBaseUrlEl.value);
-  const collectionId = ogcCollectionsEl.value;
+  const base = normalizeBaseUrl(ogcBaseUrlEl?.value);
+  const collectionId = ogcCollectionsEl?.value;
   if (!base || !collectionId) { setStatus("Base URL / Collection belum dipilih."); return; }
 
   try {
