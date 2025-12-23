@@ -128,6 +128,20 @@ async function applyTilesetHeightOffset(tileset, offsetMeters) {
   setStatus("Viewer siap. Basemap OSM aktif. Layer ion dimuat.");
 }
 
+function applyTilesetOffsetENU(tileset, eastMeters, northMeters, upMeters) {
+  const center = tileset.boundingSphere.center;
+  const enuTransform = Cesium.Transforms.eastNorthUpToFixedFrame(center);
+
+  const offsetECEF = Cesium.Matrix4.multiplyByPointAsVector(
+    enuTransform,
+    new Cesium.Cartesian3(eastMeters, northMeters, upMeters),
+    new Cesium.Cartesian3()
+  );
+
+  tileset.modelMatrix = Cesium.Matrix4.fromTranslation(offsetECEF);
+}
+
+
 /* ===========================
    Ion layers
    =========================== */
@@ -157,11 +171,9 @@ if (ION_ASSET_ID_BUILDINGS_3D) {
   tileset3D = await Cesium.Cesium3DTileset.fromIonAssetId(ION_ASSET_ID_BUILDINGS_3D);
   viewer.scene.primitives.add(tileset3D);
 
-  await tileset3D.readyPromise;
+await tileset3D.readyPromise;
+applyTilesetOffsetENU(tileset3D, 0, 0, -100); // coba -5, -10, -15 dst
 
-  // Coba offset kecil dulu: -5 s/d -30 meter adalah nilai yang sering
-  await applyTilesetHeightOffset(tileset3D, -50);
-}
 
     if (tileset3D) await viewer.zoomTo(tileset3D);
     else if (buildings2D) await viewer.zoomTo(buildings2D);
