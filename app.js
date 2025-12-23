@@ -152,6 +152,16 @@ async function loadIonLayers() {
         }
       });
     }
+     
+if (ION_ASSET_ID_BUILDINGS_3D) {
+  tileset3D = await Cesium.Cesium3DTileset.fromIonAssetId(ION_ASSET_ID_BUILDINGS_3D);
+  viewer.scene.primitives.add(tileset3D);
+
+  await tileset3D.readyPromise;
+
+  // Coba offset kecil dulu: -5 s/d -30 meter adalah nilai yang sering
+  await applyTilesetHeightOffset(tileset3D, -15);
+}
 
     if (tileset3D) await viewer.zoomTo(tileset3D);
     else if (buildings2D) await viewer.zoomTo(buildings2D);
