@@ -160,7 +160,7 @@ if (ION_ASSET_ID_BUILDINGS_3D) {
   await tileset3D.readyPromise;
 
   // Coba offset kecil dulu: -5 s/d -30 meter adalah nilai yang sering
-  await applyTilesetHeightOffset(tileset3D, -15);
+  await applyTilesetHeightOffset(tileset3D, -50);
 }
 
     if (tileset3D) await viewer.zoomTo(tileset3D);
