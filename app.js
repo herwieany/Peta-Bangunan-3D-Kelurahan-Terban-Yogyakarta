@@ -3,7 +3,7 @@ console.log("APP VERSION 20251223_FIXED");
 /* ===========================
    Konfigurasi
    =========================== */
-const ION_ACCESS_TOKEN = "PASTE_TOKEN_ANDA_DI_SINI";
+const ION_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0YjQ4NTk0NS0wZmE5LTQ3ZWEtOTEzYy0xZTZhN2E4NmU5MTgiLCJpZCI6MjEzNjk3LCJpYXQiOjE3NjU4NzQxMzd9.rWDk_DtxtgruoJjwcQovfDqYAAUoBPUI531Bm7LvH8U";
 const ION_ASSET_ID_BUILDINGS_3D = 4224210; // 3D Tiles
 const ION_ASSET_ID_BUILDINGS_2D = 4224206; // GeoJSON
 
