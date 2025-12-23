@@ -376,6 +376,19 @@ function hookDrawingHandlers() {
   }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
 }
 
+//Parallax
+function viewTopDown() {
+  viewer.camera.setView({
+    destination: Cesium.Cartesian3.fromDegrees(110.3751182, -7.7791734, 1200),
+    orientation: {
+      heading: 0,
+      pitch: Cesium.Math.toRadians(-90),
+      roll: 0
+    }
+  });
+}
+
+
 /* ===========================
    Sun direction (12:00 WIB)
    =========================== */
