@@ -167,6 +167,12 @@ async function loadIonLayers() {
 
       await tileset3D.readyPromise;
 
+       // Warna 3D abu-abu (solid, sedikit transparan)
+tileset3D.style = new Cesium.Cesium3DTileStyle({
+  color: "color('#9e9e9e', 0.95)"
+});
+
+       
       // Offset agar tidak mengambang & lebih sejajar dengan 2D
       applyTilesetOffsetENU(
         tileset3D,
